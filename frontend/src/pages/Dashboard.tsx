@@ -90,10 +90,10 @@ export default function Dashboard() {
           <header className="sticky top-0 z-40 h-14 bg-white/90 backdrop-blur border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 px-4 py-2.5 sm:px-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-800 tracking-tight">
-            {t("app_name")} &mdash; {t("ward_dashboard")}
+            {t("app_name")} — {t("ward_dashboard")}
           </h1>
           <p className="text-gray-600 text-sm mt-1">
-            {t("live_monitoring")} &bull;
+            {t("live_monitoring")} •
             <span className={`font-semibold ${online ? "text-green-800" : "text-red-800"}`}>
               {online ? t("connected") : t("offline")}
             </span>{" "}

@@ -63,8 +63,8 @@ export default function PatientDetail() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6 text-center">
         <div className="bg-white rounded-3xl shadow border border-red-200 p-8">
-          <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl font-bold mx-auto mb-4">
-            &#x26A0;
+          <div className="w-12 h-12 rounded-full bg-[#FDE8E8] flex items-center justify-center text-[#DC2626] text-xl font-bold mx-auto mb-4">
+            <Icon name="alert-circle" size={20} className="text-[#DC2626]" />
           </div>
           <h2 className="text-red-700 font-bold text-lg mb-2">{t("error")}</h2>
           <p className="text-gray-600 text-sm mb-6">{error}</p>
@@ -95,9 +95,10 @@ export default function PatientDetail() {
       <nav className="mb-8">
         <button
           onClick={() => navigate("/dashboard")}
-          className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-[#2F6BFF] hover:text-[#1F55D6]"
         >
-          <span>&#x2190;</span> {t("back_to_dashboard_btn")}
+          <Icon name="arrow-left" size={16} className="text-[#2F6BFF]" />
+          {t("back_to_dashboard_btn")}
         </button>
       </nav>
 
@@ -109,7 +110,7 @@ export default function PatientDetail() {
           <div>
             <h1 className="text-2xl font-bold text-gray-800">{patient.name}</h1>
             <p className="text-gray-600 text-sm">
-              {t("age_sex", { age: patient.age, sex: patient.sex })} &bull;
+              {t("age_sex", { age: patient.age, sex: patient.sex })} •
               {patient.bed_id != null ? t("bed_x", { id: patient.bed_id }) : t("no_bed_assigned")}
             </p>
           </div>

@@ -7,8 +7,8 @@ export default function Unauthorized() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6 sm:p-10">
       <div className="bg-white rounded-3xl shadow border border-gray-200 p-10 w-full max-w-sm sm:max-w-md text-center">
-        <div className="w-16 h-16 rounded-2xl bg-red-100 flex items-center justify-center text-red-600 text-2xl font-bold mx-auto mb-6">
-          &#x26A0;
+        <div className="w-16 h-16 rounded-2xl bg-[#FDE8E8] flex items-center justify-center text-[#DC2626] text-2xl font-bold mx-auto mb-6">
+          <Icon name="alert-circle" size={24} className="text-[#DC2626]" />
         </div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("not_authorized")}</h2>
         <p className="text-gray-600 text-sm mb-6">

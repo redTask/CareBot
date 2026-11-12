@@ -1,31 +1,103 @@
-import { SVGProps } from "react"
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  Battery,
+  Bell,
+  Building2,
+  ChevronDown,
+  Calendar,
+  CheckCircle,
+  CircleCheck,
+  Clock,
+  Copy,
+  Edit2,
+  FileText,
+  Globe,
+  Grid,
+  Heart,
+  HeartPulse,
+  Home,
+  LogOut,
+  Monitor,
+  Phone,
+  Pill,
+  Plus,
+  PlusCircle,
+  Power,
+  Robot,
+  Search,
+  Settings,
+  Shield,
+  Thermometer,
+  Trash2,
+  User,
+  Users,
+  XCircle,
+} from "lucide-react"
+import type { SVGProps } from "react"
 
-type IconSize = "xs" | "sm" | "md" | "lg" | "xl"
-
-const SIZE_MAP: Record<IconSize, string> = {
-  xs: "w-4 h-4",    // 16px inline with text
-  sm: "w-5 h-5",    // 20px default
-  md: "w-6 h-6",    // 24px buttons and headers
-  lg: "w-8 h-8",    // 32px large status badges
-  xl: "w-12 h-12",  // 48px empty-state illustration only
+const ICONS: Record<string, React.ComponentType<SVGProps<SVGSVGElement>>> = {
+  "alert-circle": AlertCircle,
+  "alert-triangle": AlertTriangle,
+  "arrow-left": ArrowLeft,
+  battery: Battery,
+  bell: Bell,
+  building: Building2,
+  "chevron-down": ChevronDown,
+  calendar: Calendar,
+  "check-circle": CheckCircle,
+  "circle-check": CircleCheck,
+  clock: Clock,
+  copy: Copy,
+  edit: Edit2,
+  "file-text": FileText,
+  globe: Globe,
+  grid: Grid,
+  heart: Heart,
+  "heart-pulse": HeartPulse,
+  home: Home,
+  "log-out": LogOut,
+  monitor: Monitor,
+  phone: Phone,
+  pill: Pill,
+  plus: Plus,
+  "plus-circle": PlusCircle,
+  power: Power,
+  robot: Robot,
+  search: Search,
+  settings: Settings,
+  shield: Shield,
+  thermometer: Thermometer,
+  trash: Trash2,
+  user: User,
+  users: Users,
+  "x-circle": XCircle,
 }
 
-interface IconProps extends SVGProps<SVGSVGElement> {
+// Only explicit sizes: 16, 20 or 24 px. No icon larger than 32 px.
+// Sizes are applied as Tailwind classes so they override the global svg safety rule.
+type IconSize = 16 | 20 | 24
+
+const SIZE_CLASSES: Record<IconSize, string> = {
+  16: "w-4 h-4",
+  20: "w-5 h-5",
+  24: "w-6 h-6",
+}
+
+export interface IconProps extends Omit<SVGProps<SVGSVGElement>, "size" | "color"> {
+  name: keyof typeof ICONS
   size?: IconSize
-  children: React.ReactNode
+  className?: string
 }
 
-export default function Icon({ size = "sm", className = "", ...props }: IconProps) {
+export default function Icon({ name, size = 20, className = "", ...props }: IconProps) {
+  const Comp = ICONS[name]
+  if (!Comp) return null
   return (
-    <svg
+    <Comp
       {...props}
-      className={SIZE_MAP[size] + " " + className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      viewBox="0 0 24 24"
+      className={["icon", SIZE_CLASSES[size], className].filter(Boolean).join(" ")}
     />
   )
 }

@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { useAppStore } from "../store/useStore"
 import { getLang, t } from "../lib/i18n"
+import Btn from "./Btn"
+import Icon from "./Icon"
 
 export default function EStopButton() {
   const { token, user } = useAppStore()
@@ -54,39 +56,34 @@ export default function EStopButton() {
     <div className="flex items-center gap-3">
       {stopped ? (
         <>
-          <span className="text-xs font-bold uppercase tracking-wider text-red-900 bg-red-100 px-2 py-0.5 rounded">
+          <span className="text-xs font-bold uppercase tracking-wider text-critical-dark bg-critical-light px-2.5 py-0.5 rounded">
             {t("robots_stopped")}
           </span>
-          <button
+          <Btn
             onClick={handleResume}
             disabled={!isNurseOrDoctor}
-            className={`min-h-[40px] px-3 py-2 rounded-xl text-sm font-semibold border transition-all active:scale-[0.98] ${
-              !isNurseOrDoctor
-                ? "bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed"
-                : "bg-red-600 text-white border-red-700 hover:bg-red-700"
-            }`}
+            variant={isNurseOrDoctor ? "primary" : "secondary"}
           >
             {t("resume")}
-          </button>
+          </Btn>
         </>
       ) : (
-        <button
+        <Btn
           onClick={handleEstop}
           disabled={confirming}
-          className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:bg-red-700 active:scale-95 transition-all"
+          variant="danger"
+          size="lg"
+          className="w-12 h-12 p-0 justify-center"
           title={t("emergency_stop")}
           aria-label={t("emergency_stop")}
         >
-          &#x26A0;
-        </button>
+          <Icon name="alert-triangle" size={20} className="text-white" />
+        </Btn>
       )}
       {confirming && (
-        <button
-          onClick={handleEstop}
-          className="min-h-[40px] px-3 py-2 rounded text-sm font-bold bg-red-700 text-white hover:bg-red-800"
-        >
+        <Btn variant="danger" size="md" onClick={handleEstop} className="w-full">
           {t("confirm_stop")}
-        </button>
+        </Btn>
       )}
     </div>
   )

@@ -16,8 +16,8 @@ export default function OfflineBanner() {
     >
       <span className="flex items-center justify-center gap-2">
         <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" aria-hidden="true" />
-        <span>Offline &mdash; last updated {lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : "—"}</span>
-        <span className="text-amber-300 animate-pulse">Reconnecting&hellip;</span>
+        <span>Offline — last updated {lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : "—"}</span>
+        <span className="text-[#FCD34D] animate-pulse">Reconnecting…</span>
       </span>
     </div>
   )
