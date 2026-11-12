@@ -59,7 +59,7 @@ export default function AuditLogView() {
                   {new Date(log.timestamp!).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-800">
-                  {log.user_id != null ? `User #${log.user_id}` : t("system")}
+                  {log.user_id != null ? t("user_x", { id: log.user_id }) : t("system")}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-800 font-medium">
                   {log.action}

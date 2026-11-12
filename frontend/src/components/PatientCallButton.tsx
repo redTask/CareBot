@@ -34,7 +34,7 @@ export default function PatientCallButton() {
         {sent ? t("call_sent") : t("simulate_patient_call")}
       </button>
       {sent && (
-        <span className="text-[10px] text-green-600 font-semibold">
+        <span className="text-[10px] text-green-800 font-semibold">
           {t("high_priority_alert")}
         </span>
       )}

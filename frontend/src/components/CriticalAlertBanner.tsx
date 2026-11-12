@@ -1,13 +1,9 @@
 import { useAppStore } from "../store/useStore"
 import { acknowledgeAlert } from "../lib/api"
-import { useEffect, useRef } from "react"
 import { t } from "../lib/i18n"
-
-const ALERT_SOUND_URL = "/alert.mp3"
 
 export default function CriticalAlertBanner() {
   const { alerts, acknowledgeAlert: ackAlert, user } = useAppStore()
-  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const criticalAlerts = alerts.filter(
     (a) => a.severity === "critical" && a.status === "open"
@@ -15,24 +11,6 @@ export default function CriticalAlertBanner() {
   const watchAlerts = alerts.filter(
     (a) => a.severity === "watch" && a.status === "open"
   )
-
-  useEffect(() => {
-    if (criticalAlerts.length > 0) {
-      if (!audioRef.current) {
-        audioRef.current = new Audio(ALERT_SOUND_URL)
-        audioRef.current.loop = true
-      }
-      void audioRef.current.play().catch(() => {})
-    } else if (audioRef.current) {
-      void audioRef.current.pause()
-      audioRef.current.currentTime = 0
-    }
-    return () => {
-      if (audioRef.current) {
-        void audioRef.current.pause()
-      }
-    }
-  }, [criticalAlerts.length])
 
   if (alerts.length === 0) return null
 
@@ -60,18 +38,18 @@ export default function CriticalAlertBanner() {
       <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
           {hasCritical && (
-            <span className="font-bold text-red-100 uppercase tracking-wider text-xs">
+            <span className="bg-red-600 text-white text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded">
               {t("severity_critical")}
             </span>
           )}
           <span className={`font-semibold ${hasCritical ? "text-red-100" : "text-amber-800"}`}>
             {hasCritical
-              ? `${criticalAlerts.length} critical alert${
-                  criticalAlerts.length > 1 ? "s" : ""
-                }`
-              : `${watchAlerts.length} watch alert${
-                  watchAlerts.length > 1 ? "s" : ""
-                }`}
+              ? criticalAlerts.length === 1
+                ? t("critical_alerts", { count: criticalAlerts.length })
+                : t("critical_alerts_plural", { count: criticalAlerts.length })
+              : watchAlerts.length === 1
+                ? t("watch_alerts", { count: watchAlerts.length })
+                : t("watch_alerts_plural", { count: watchAlerts.length })}
           </span>
         </div>
 
@@ -83,13 +61,14 @@ export default function CriticalAlertBanner() {
                 key={a.id}
                 onClick={() => handleAcknowledge(a.id)}
                 disabled={a.status !== "open"}
-                className={`px-3 py-1.5 rounded text-xs font-semibold border ${
+                className={`min-h-[40px] px-3 py-2 rounded text-sm font-semibold border ${
                   a.severity === "critical"
                     ? "bg-red-600 text-white border-red-700 hover:bg-red-700 disabled:opacity-60"
                     : "bg-amber-500 text-white border-amber-600 hover:bg-amber-600 disabled:opacity-60"
                 }`}
               >
-                {t("acknowledge")} &bull; {a.patient_id != null ? `Patient #${a.patient_id}` : "System"}
+                {t("acknowledge")} &bull;
+                {a.patient_id != null ? t("patient_x", { id: a.patient_id }) : t("system")}
               </button>
             ))}
         </div>

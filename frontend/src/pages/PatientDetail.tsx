@@ -5,6 +5,7 @@ import { fetchPatient, apiRequest, fetchMedicationEvents } from "../lib/api"
 import VitalsChart from "../components/VitalsChart"
 import MedicationReminder from "../components/MedicationReminder"
 import CarePlanEditor from "../components/CarePlanEditor"
+import EStopButton from "../components/EStopButton"
 import { t } from "../lib/i18n"
 
 export default function PatientDetail() {
@@ -100,7 +101,7 @@ export default function PatientDetail() {
         </button>
       </nav>
 
-      <header className="mb-8">
+      <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg">
             {patient.name.charAt(0)}
@@ -108,20 +109,21 @@ export default function PatientDetail() {
           <div>
             <h1 className="text-2xl font-bold text-gray-800">{patient.name}</h1>
             <p className="text-gray-600 text-sm">
-              {patient.age}y &bull; {patient.sex} &bull;
-              {patient.bed_id != null ? `Bed ${patient.bed_id}` : "No bed assigned"}
+              {t("age_sex", { age: patient.age, sex: patient.sex })} &bull;
+              {patient.bed_id != null ? t("bed_x", { id: patient.bed_id }) : t("no_bed_assigned")}
             </p>
           </div>
         </div>
+        <EStopButton />
         {patient.conditions && (
           <p className="mt-2 text-[10px] text-gray-500">{t("conditions_label")} {patient.conditions}</p>
         )}
         {latestVitals[id] && (
           <div className="mt-4 flex gap-4">
             {[
-              { label: "HR", type: "heart_rate" },
-              { label: "SpO₂", type: "spo2" },
-              { label: "Temp", type: "temperature" },
+              { label: t("heart_rate"), type: "heart_rate" },
+              { label: t("spo2"), type: "spo2" },
+              { label: t("temperature"), type: "temperature" },
             ].map((item) => {
               const v = latestVitals[id]
               if (v.type !== item.type) return null

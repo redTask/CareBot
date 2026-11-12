@@ -127,6 +127,35 @@ const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     ok: "OK",
     yes: "Yes",
     no: "No",
+    // Task queue
+    tasks_count: "{count} tasks",
+    task_count_single: "{count} task",
+    task_x: "Task {id}",
+    robot_x: "Robot {id}",
+    robot_unassigned: "Unassigned",
+    // Alerts banner
+    critical_alerts: "{count} critical alert",
+    critical_alerts_plural: "{count} critical alerts",
+    watch_alerts: "{count} watch alert",
+    watch_alerts_plural: "{count} watch alerts",
+    patient_x: "Patient #{id}",
+    // Beds / patient detail
+    bed_x: "Bed {id}",
+    no_bed_assigned: "No bed assigned",
+    last_checked_x: "Last checked {time}",
+    unoccupied: "Unoccupied",
+    aria_bed_occupied: "Bed {label}, patient {name}, status {status}",
+    aria_bed_empty: "Bed {label}, unoccupied, status {status}",
+    aria_robot: "Robot {name}, status {status}, battery {battery}%",
+    // Medication
+    due_x: "Due {time}",
+    status_pending: "Pending",
+    status_acknowledged: "Acknowledged",
+    status_missed: "Missed",
+    // Audit
+    user_x: "User #{id}",
+    loading: "Loading&hellip;",
+    dismiss: "Dismiss",
   },
   ml: {
     app_name: "കെയർബോട്ട്",
@@ -166,29 +195,29 @@ const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     complete: "പൂര്ത്തിയാക്കുക",
     cancel: "രദ്ദാക്കുക",
     simulate_patient_call: "രോഗി വിളിയും അനുകരിക്കുക",
-    call_sent: "വിളcue",
-    high_priority_alert: "ഉയർന്ന മുൻഗണന അലerte + ഓട്ടോ-ഡിസ്പാച്ച് സൃഷ്ടിച്ചു",
+    call_sent: "വിളി അയച്ചു",
+    high_priority_alert: "ഉയർന്ന മുൻഗണന അലർട്ട് + ഓട്ടോ-ഡിസ്പാച് സൃഷ്ടിച്ചു",
     emergency_stop: "അടിയന്തിര നിർത്തൽ",
     robots_stopped: "റോബോട്ടുകൾ നിർത്തി",
     resume: "പുനരാരംഭിക്കുക",
     confirm_stop: "STOP ഉറപ്പാക്കുക",
     medication_schedule: "മരുന്ന് ക്രമീകരണം",
-    no_medications: "മരുന്നുകൾ ക്രമീകരിച്ചിട്ട.",
+    no_medications: "ക്രമീകരിച്ച മരുന്നുകളില്ല.",
     acknowledge_med: "സ്വീകരിക്കുക",
     mark_missed: "വിട്ടുപോയി",
     care_plan: "പരിചരണ പദ്ധതി",
     no_care_plan: "പരിചരണ പദ്ധതി ഇല്ല",
     doctor_only_edit: "ഡോക്ടർ മാത്രം എഡിറ്റ്",
-    notes: "",
-    thresholds: "തidores (ഡോക്ടർമാർ മാറ്റ'entre)",
-    critical_range: "ക്രിട്ടിക്കൽ: &lt;{min} or &gt;{max}",
+    notes: "നോട്ടുകൾ",
+    thresholds: "പരിധികൾ (ഡോക്ടർമാർ മാറ്റാം)",
+    critical_range: "ക്രിട്ടിക്കൽ: &lt;{min} അല്ലെങ്കിൽ &gt;{max}",
     save_care_plan: "പരിചരണ പദ്ധതി സേവ് ചെയ്യുക",
     saving: "സേവ് ചെയ്യുന്നു&hellip;",
-    edit_thresholds: "തidores എഡിറ്റ് ചെയ്യുക (ഡോക്ടർ)",
-    no_medications_scheduled: "മരുന്നുIlluminate.undefined",
+    edit_thresholds: "പരിധികൾ എഡിറ്റ് ചെയ്യുക (ഡോക്ടർ)",
+    no_medications_scheduled: "ഇപ്പോൾ മരുന്നുകൾ ക്രമീകരിച്ചിട്ടില്ല.",
     audit_log: "ഓഡിറ്റ് ലോഗ്",
-    audit_subtitle: "ഓരോ മ്യൂട്ടേഷൻaktion് ഉപയോക്താവ്, വിഭാഗം, എന്റിറ്റി, സമയവുമായി രേഖപ്പെടുത്തുന്നു.",
-    no_audit_entries: "ഓഡിറ്റ് രേഖകൾ Illuminate.undefined.",
+    audit_subtitle: "എല്ലാ മാറ്റങ്ങളും ഉപയോക്താവ്, പ്രവർത്തനം, എന്റിറ്റിയും സമയവും രേഖപ്പെടുത്തുന്നു.",
+    no_audit_entries: "ഓഡിറ്റ് രേഖകൾ ലഭ്യമല്ല.",
     time: "സമയം",
     user: "ഉപയോക്താവ്",
     action: "പ്രവർത്തനം",
@@ -197,7 +226,7 @@ const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     system: "സിസ്റ്റം",
     not_authorized: "അനുമതിയില്ല",
     signed_in_as: "നിങ്ങൾ സൈൻ ചെയ്തിരിക്കുന്നു",
-    requires_different_role: ", എന്നാൽ ഈ പേജ് വ്യത്യസ്ത  ആവശ്യമാണ്.",
+    requires_different_role: ", എന്നാൽ ഈ പേജിന് വ്യത്യസ്ത റോള് ആവശ്യമാണ്.",
     back_to_dashboard_btn: "ഡാഷ്ബോർഡിലേക്ക് മടങ്ങുക",
     language: "ഭാഷ",
     english: "ഇംഗ്ലീഷ്",
@@ -206,8 +235,8 @@ const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     spo2: "സ്പോ2",
     temperature: "താപനില",
     range_1h: "1h ഡിസ്‌പ്ലേ",
-    no_readings: "{label} റീഡിംഗുകൾ Illuminate.undefined",
-    patient_not_found: "രോഗി Illuminate.undefined.",
+    no_readings: "{label} റീഡിംഗുകൾ ലഭ്യമല്ല.",
+    patient_not_found: "രോഗി കണ്ടെത്തിയില്ല.",
     loading_patient: "രോഗി ലോഡ് ചെയ്യുന്നു&hellip;",
     error: "പിശക്",
     conditions: "അസുഖങ്ങൾ",
@@ -215,11 +244,11 @@ const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     conditions_label: "അസുഖങ്ങൾ:",
     age_sex: "{age}y &bull; {sex}",
     last_checked: "അവസാനം പരിശോധിച്ചു",
-    no_vitals_yet: "വൈറ്റലുകൾ Illuminate.undefined.",
+    no_vitals_yet: "വൈറ്റൽ റീഡിംഗുകൾ ഇല്ല.",
     checked_at: "പരിശോധിച്ചു {time}",
-    heart_rate_label: "ഹൃദയ Darwin (bpm)",
-    spo2_label: "സ്പോ2 (%)",
-    temperature_label: "താപനില (C)",
+    heart_rate_label: "ഹൃദയമിടிப்பு (bpm)",
+    spo2_label: "സ്പോ₂ (%)",
+    temperature_label: "താപനില (°C)",
     medications: "മരുന്നുകൾ",
     drug: "മരുന്നു",
     dose: "ഡോസ്",
@@ -231,6 +260,35 @@ const TRANSLATIONS: Record<Lang, Record<string, string>> = {
     ok: "ശരി",
     yes: "അതെ",
     no: "ഇല്ല",
+    // Task queue
+    tasks_count: "{count} ടാസ്കുകൾ",
+    task_count_single: "{count} ടാസ്ക്",
+    task_x: "ടാസ്ക് {id}",
+    robot_x: "റോബോട്ട് {id}",
+    robot_unassigned: "നിയോഗിക്കാത്ത",
+    // Alerts banner
+    critical_alerts: "{count} ക്രിട്ടിക്കൽ അലർട്ട്",
+    critical_alerts_plural: "{count} ക്രിട്ടിക്കൽ അലർട്ടുകൾ",
+    watch_alerts: "{count} വാച്ച് അലർട്ട്",
+    watch_alerts_plural: "{count} വാച്ച് അലർട്ടുകൾ",
+    patient_x: "രോഗി #{id}",
+    // Beds / patient detail
+    bed_x: "കിടക്ക് {id}",
+    no_bed_assigned: "കിടക്ക് നിയോഗിച്ചിട്ടില്ല",
+    last_checked_x: "അവസാനം പരിശോധിച്ചത് {time}",
+    unoccupied: "ആളില്ല",
+    aria_bed_occupied: "കിടക്ക് {label}, രോഗി {name}, സ്ഥിതി {status}",
+    aria_bed_empty: "കിടക്ക് {label}, ആളില്ല, സ്ഥിതി {status}",
+    aria_robot: "റോബോട്ട് {name}, സ്ഥിതി {status}, ബാറ്ററി {battery}%",
+    // Medication
+    due_x: "{time} മുമ്പ്",
+    status_pending: "കാത്തിരിക്കുന്നു",
+    status_acknowledged: "അംഗീകരിച്ചു",
+    status_missed: "വിട്ടുപോയി",
+    // Audit
+    user_x: "ഉപയോക്താവ് #{id}",
+    loading: "ലോഡ് ചെയ്യുന്നു&hellip;",
+    dismiss: "ഓടിക്കുക",
   },
 }
 
@@ -239,6 +297,17 @@ let currentLang: Lang = "en"
 export function setLang(lang: Lang) {
   currentLang = lang
   localStorage.setItem("carebot-lang", lang)
+  // Components read getLang() at render time and are not subscribed to
+  // language changes, so reload to apply the new language everywhere and
+  // guarantee it persists across refreshes. (reload is a no-op / throws in
+  // test harnesses, which is fine.)
+  try {
+    if (typeof window !== "undefined" && window.location.reload) {
+      window.location.reload()
+    }
+  } catch {
+    // ignore (e.g. jsdom)
+  }
 }
 
 export function getLang(): Lang {

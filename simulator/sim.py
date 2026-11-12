@@ -138,10 +138,14 @@ def normal_night(robots: list[dict], beds: list[dict]) -> None:
             low_battery = s["battery"] <= 20
             if low_battery or not assigned:
                 target_x, target_y = 0.0, 0.0  # dock
-                status = "charging" if s["at_dock"] else "busy"
                 if s["at_dock"]:
-                    s["battery"] = min(100, s["battery"] + 5)
+                    if s["battery"] > 20:
+                        status = "idle"
+                    else:
+                        status = "charging"
+                        s["battery"] = min(100, s["battery"] + 5)
                 else:
+                    status = "busy"
                     s["battery"] = max(0, s["battery"] - 1)
             else:
                 bed = assigned[s["bed_index"] % len(assigned)]
@@ -211,10 +215,14 @@ def spo2_drop(robots: list[dict], beds: list[dict]) -> None:
             low_battery = s["battery"] <= 20
             if low_battery or not assigned:
                 target_x, target_y = 0.0, 0.0
-                status = "charging" if s["at_dock"] else "busy"
                 if s["at_dock"]:
-                    s["battery"] = min(100, s["battery"] + 5)
+                    if s["battery"] > 20:
+                        status = "idle"
+                    else:
+                        status = "charging"
+                        s["battery"] = min(100, s["battery"] + 5)
                 else:
+                    status = "busy"
                     s["battery"] = max(0, s["battery"] - 1)
             else:
                 bed = assigned[s["bed_index"] % len(assigned)]
@@ -292,10 +300,14 @@ def low_battery(robots: list[dict], beds: list[dict]) -> None:
             low_battery = s["battery"] <= 20
             if low_battery or not assigned:
                 target_x, target_y = 0.0, 0.0
-                status = "charging" if s["at_dock"] else "busy"
                 if s["at_dock"]:
-                    s["battery"] = min(100, s["battery"] + 5)
+                    if s["battery"] > 20:
+                        status = "idle"
+                    else:
+                        status = "charging"
+                        s["battery"] = min(100, s["battery"] + 5)
                 else:
+                    status = "busy"
                     s["battery"] = max(0, s["battery"] - 1)
             else:
                 bed = assigned[s["bed_index"] % len(assigned)]

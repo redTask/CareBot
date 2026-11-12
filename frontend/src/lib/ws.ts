@@ -2,21 +2,34 @@ import { useAppStore } from "../store/useStore"
 
 let ws: WebSocket | null = null
 let reconnectTimer: number | null = null
+// Generation counter: only the most recently created socket may own the
+// reconnect timer. This prevents duplicate connections when connectWS is
+// called while an older reconnect timer is still pending (e.g. rapid
+// disconnect / reconnect / disconnect cycles).
+let generation = 0
 
 export function connectWS(url: string, token: string | null) {
+  // Cancel any pending reconnect and close any existing socket so there is
+  // never more than one active WebSocket connection.
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer)
+    reconnectTimer = null
+  }
   if (ws) {
     ws.close()
+    ws = null
   }
+
+  const gen = ++generation
   const wsUrl = `${url}/ws${token ? `?token=${encodeURIComponent(token)}` : ""}`
-  ws = new WebSocket(wsUrl)
+  const socket = new WebSocket(wsUrl)
+  ws = socket
 
   ws.onopen = () => {
+    // A newer connection may have replaced this one while it was connecting.
+    if (ws !== socket) return
     useAppStore.getState().setOnline(true)
     useAppStore.getState().setLastUpdated(new Date().toISOString())
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer)
-      reconnectTimer = null
-    }
   }
 
   ws.onmessage = (event) => {
@@ -74,11 +87,17 @@ export function connectWS(url: string, token: string | null) {
   }
 
   ws.onclose = () => {
+    // Only the socket that owns the current generation may schedule a
+    // reconnect; an explicit disconnect() or a newer connectWS() already
+    // cleared the timer and nulled `ws`.
+    if (ws !== socket) return
     useAppStore.getState().setOnline(false)
     ws = null
-    // Auto-reconnect after 3 seconds
+    // Auto-reconnect after 3 seconds.
     reconnectTimer = window.setTimeout(() => {
-      const { token } = useAppStore.getState()
+      reconnectTimer = null
+      // If something reconnected in the meantime, do nothing.
+      if (ws) return
       connectWS(url, token)
     }, 3000)
   }

@@ -3,11 +3,11 @@ import { cancelTask, completeTask, assignTask } from "../lib/api"
 import { getLang, t } from "../lib/i18n"
 
 const STATUS_CONFIG: Record<string, { color: string; bg: string; labelKey: string }> = {
-  queued: { color: "text-gray-700", bg: "bg-gray-100", labelKey: "status_queued" },
-  running: { color: "text-blue-700", bg: "bg-blue-100", labelKey: "status_running" },
-  done: { color: "text-green-700", bg: "bg-green-100", labelKey: "status_done" },
-  failed: { color: "text-red-700", bg: "bg-red-100", labelKey: "status_failed" },
-  cancelled: { color: "text-gray-500", bg: "bg-gray-100", labelKey: "status_cancelled" },
+  queued: { color: "text-gray-800", bg: "bg-gray-100", labelKey: "status_queued" },
+  running: { color: "text-blue-800", bg: "bg-blue-100", labelKey: "status_running" },
+  done: { color: "text-green-800", bg: "bg-green-100", labelKey: "status_done" },
+  failed: { color: "text-red-800", bg: "bg-red-100", labelKey: "status_failed" },
+  cancelled: { color: "text-gray-700", bg: "bg-gray-100", labelKey: "status_cancelled" },
 }
 
 const ML_STATUS_TEXT: Record<string, string> = {
@@ -76,7 +76,9 @@ export default function TaskQueue() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold text-gray-800 text-base">{t("task_queue")}</h3>
         <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-          {tasks.length} task{tasks.length > 1 ? "s" : ""}
+          {tasks.length === 1
+            ? t("task_count_single", { count: tasks.length })
+            : t("tasks_count", { count: tasks.length })}
         </span>
       </div>
       <div className="space-y-3">
@@ -107,10 +109,10 @@ export default function TaskQueue() {
                 </div>
                 <div className="text-sm text-gray-800 truncate">
                   {task.type.replace("_", " ")}
-                  {task.bed_id != null ? ` &bull; Bed ${task.bed_id}` : ""}
+                  {task.bed_id != null ? ` &bull; ${t("bed_x", { id: task.bed_id })}` : ""}
                 </div>
-                <div className="text-[10px] text-gray-400 mt-1">
-                  Robot {task.robot_id ?? "unassigned"} &bull;
+                <div className="text-[10px] text-gray-500 mt-1">
+                  {t("robot_x", { id: task.robot_id ?? t("robot_unassigned") })} &bull;
                   {new Date(task.created_at!).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -121,7 +123,7 @@ export default function TaskQueue() {
                 {task.status === "queued" && (
                   <button
                     onClick={() => handleAssign(task.id)}
-                    className="px-2.5 py-1 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
+                    className="min-h-[40px] px-3 py-2 rounded text-sm font-semibold bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100"
                   >
                     {t("assign")}
                   </button>
@@ -129,7 +131,7 @@ export default function TaskQueue() {
                 {task.status === "running" && (
                   <button
                     onClick={() => handleComplete(task.id)}
-                    className="px-2.5 py-1 rounded text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
+                    className="min-h-[40px] px-3 py-2 rounded text-sm font-semibold bg-green-50 text-green-800 border border-green-200 hover:bg-green-100"
                   >
                     {t("complete")}
                   </button>
@@ -137,7 +139,7 @@ export default function TaskQueue() {
                 {["queued", "running"].includes(task.status) && (
                   <button
                     onClick={() => handleCancel(task.id)}
-                    className="px-2.5 py-1 rounded text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
+                    className="min-h-[40px] px-3 py-2 rounded text-sm font-semibold bg-red-50 text-red-800 border border-red-200 hover:bg-red-100"
                   >
                     {t("cancel")}
                   </button>

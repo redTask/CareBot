@@ -40,7 +40,7 @@ export default function VitalsChart({ readings, vitalType, range }: VitalsChartP
 
   if (data.length === 0) {
     return (
-      <div className="h-56 flex flex-col items-center justify-center bg-gray-50 rounded-xl border border-gray-200 text-gray-400">
+      <div className="h-56 flex flex-col items-center justify-center bg-gray-50 rounded-xl border border-gray-200 text-gray-600">
         <span className="text-sm">{t("no_readings", { label: labelMap[vitalType] })}</span>
       </div>
     )

@@ -45,9 +45,9 @@ export default function MedicationReminder({ patientId }: { patientId: number })
   }
 
   const STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
-    pending: { color: "text-amber-700", bg: "bg-amber-100" },
-    acknowledged: { color: "text-green-700", bg: "bg-green-100" },
-    missed: { color: "text-red-700", bg: "bg-red-100" },
+    pending: { color: "text-amber-800", bg: "bg-amber-100" },
+    acknowledged: { color: "text-green-800", bg: "bg-green-100" },
+    missed: { color: "text-red-800", bg: "bg-red-100" },
   }
 
   return (
@@ -71,7 +71,11 @@ export default function MedicationReminder({ patientId }: { patientId: number })
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className={`text-xs font-bold uppercase tracking-wider ${cfg.color}`}>
-                    {e.status}
+                    {e.status === "pending"
+                      ? t("status_pending")
+                      : e.status === "acknowledged"
+                        ? t("status_acknowledged")
+                        : t("status_missed")}
                   </span>
                 </div>
                 <div className="min-w-0">
@@ -79,7 +83,7 @@ export default function MedicationReminder({ patientId }: { patientId: number })
                     {e.drug} {e.dose}
                   </div>
                   <div className="text-[10px] text-gray-500 mt-0.5">
-                    Due {new Date(e.due_at!).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    {t("due_x", { time: new Date(e.due_at!).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) })}
                   </div>
                 </div>
               </div>
@@ -89,14 +93,14 @@ export default function MedicationReminder({ patientId }: { patientId: number })
                     <button
                       onClick={() => handleAck(e.id)}
                       disabled={loading}
-                      className="px-2.5 py-1.5 rounded text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 disabled:opacity-60"
+                      className="min-h-[40px] px-3 py-2 rounded text-sm font-semibold bg-green-50 text-green-800 border border-green-200 hover:bg-green-100 disabled:opacity-60"
                     >
                       {t("acknowledge_med")}
                     </button>
                     <button
                       onClick={() => handleMiss(e.id)}
                       disabled={loading}
-                      className="px-2.5 py-1.5 rounded text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 disabled:opacity-60"
+                      className="min-h-[40px] px-3 py-2 rounded text-sm font-semibold bg-red-50 text-red-800 border border-red-200 hover:bg-red-100 disabled:opacity-60"
                     >
                       {t("mark_missed")}
                     </button>
@@ -104,7 +108,11 @@ export default function MedicationReminder({ patientId }: { patientId: number })
                 )}
                 {!isPending && (
                   <span className={`text-[10px] font-semibold ${cfg.color}`}>
-                    {e.status.charAt(0).toUpperCase() + e.status.slice(1)}
+                    {e.status === "pending"
+                      ? t("status_pending")
+                      : e.status === "acknowledged"
+                        ? t("status_acknowledged")
+                        : t("status_missed")}
                   </span>
                 )}
               </div>

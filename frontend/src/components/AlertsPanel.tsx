@@ -3,14 +3,14 @@ import { acknowledgeAlert } from "../lib/api"
 import { getLang, t } from "../lib/i18n"
 
 const SEVERITY_CONFIG: Record<string, { color: string; bg: string; dot: string; labelKey: string }> = {
-  critical: { color: "text-red-700", bg: "bg-red-100", dot: "bg-red-500", labelKey: "severity_critical" },
-  watch: { color: "text-amber-700", bg: "bg-amber-100", dot: "bg-amber-500", labelKey: "severity_watch" },
-  info: { color: "text-blue-700", bg: "bg-blue-100", dot: "bg-blue-500", labelKey: "severity_info" },
+  critical: { color: "text-red-900", bg: "bg-red-100", dot: "bg-red-600", labelKey: "severity_critical" },
+  watch: { color: "text-amber-900", bg: "bg-amber-100", dot: "bg-amber-600", labelKey: "severity_watch" },
+  info: { color: "text-blue-900", bg: "bg-blue-100", dot: "bg-blue-600", labelKey: "severity_info" },
 }
 
 const ML_SEVERITY_TEXT: Record<string, string> = {
   severity_critical: "ക്രിട്ടിക്കൽ",
-  severity_watch: "眾今",
+  severity_watch: "വാച്ച്",
   severity_info: "വിവരങ്ങൾ",
 }
 
@@ -71,8 +71,8 @@ export default function AlertsPanel() {
                     </span>
                   </div>
                   <div className="text-sm text-gray-800">{a.message}</div>
-                  <div className="text-[10px] text-gray-400 mt-1">
-                    {a.patient_id != null ? `Patient #${a.patient_id}` : "System"} &bull;
+                  <div className="text-[10px] text-gray-500 mt-1">
+                    {a.patient_id != null ? t("patient_x", { id: a.patient_id }) : t("system")} &bull;
                     {new Date(a.created_at!).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
                 </div>
@@ -80,7 +80,7 @@ export default function AlertsPanel() {
               <button
                 onClick={() => handleAcknowledge(a.id)}
                 disabled={a.status !== "open"}
-                className={`px-3 py-1.5 rounded text-xs font-semibold border transition-all ${
+                className={`min-h-[40px] px-3 py-2 rounded text-sm font-semibold border transition-all ${
                   a.severity === "critical"
                     ? "bg-red-600 text-white border-red-700 hover:bg-red-700 disabled:opacity-60"
                     : "bg-amber-500 text-white border-amber-600 hover:bg-amber-600 disabled:opacity-60"

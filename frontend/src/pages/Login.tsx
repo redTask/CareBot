@@ -49,11 +49,11 @@ export default function Login() {
           <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider font-medium">
             {t("tagline")}
           </p>
-          <p className="text-[10px] text-gray-400 mt-0.5 italic">{t("research_prototype")}</p>
+          <p className="text-[10px] text-gray-600 mt-0.5 italic">{t("research_prototype")}</p>
         </div>
 
         {error && (
-          <div className="p-2 rounded text-sm text-red-700 bg-red-50 border border-red-100 mb-4">
+          <div className="p-2 rounded text-sm text-red-800 bg-red-50 border border-red-100 mb-4">
             {error}
           </div>
         )}
@@ -97,15 +97,15 @@ export default function Login() {
           <div className="space-y-1">
             <div className="text-[10px] text-gray-600 flex justify-between">
               <span className="font-medium">{t("nurse")}</span>
-              <span className="text-gray-400">nurse@carebot.in / nurse123</span>
+              <span className="text-gray-500">nurse@carebot.in / nurse123</span>
             </div>
             <div className="text-[10px] text-gray-600 flex justify-between">
               <span className="font-medium">{t("doctor")}</span>
-              <span className="text-gray-400">doctor@carebot.in / doctor123</span>
+              <span className="text-gray-500">doctor@carebot.in / doctor123</span>
             </div>
             <div className="text-[10px] text-gray-600 flex justify-between">
               <span className="font-medium">{t("admin")}</span>
-              <span className="text-gray-400">admin@carebot.in / admin123</span>
+              <span className="text-gray-500">admin@carebot.in / admin123</span>
             </div>
           </div>
         </div>

@@ -5,7 +5,7 @@ import { t } from "../lib/i18n"
 export default function FloorPlan({ beds }: { beds: Bed[] }) {
   if (beds.length === 0) {
     return (
-      <div className="bg-white rounded-2xl shadow border border-gray-200 p-8 text-center text-gray-400">
+      <div className="bg-white rounded-2xl shadow border border-gray-200 p-8 text-center text-gray-600">
         <p className="text-lg">{t("no_beds")}</p>
       </div>
     )
@@ -44,8 +44,16 @@ export default function FloorPlan({ beds }: { beds: Bed[] }) {
             const cx = col * cellW + cellW / 2
             const cy = row * cellH + cellH / 2
             return (
-              <g key={bed.id} tabIndex={0} role="button" aria-label={`Bed ${bed.label}`} className="cursor-pointer">
-                <circle cx={cx} cy={cy} r={26} fill="#e5e7eb" stroke="#9ca3af" strokeWidth="2" />
+              <g key={bed.id} tabIndex={0} role="button" aria-label={t("bed_x", { id: bed.label })} className="cursor-pointer">
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={26}
+                  fill="#e5e7eb"
+                  stroke="#9ca3af"
+                  strokeWidth="2"
+                  className="focus:stroke-blue-500 focus:stroke-[3px]"
+                />
                 <text
                   x={cx}
                   y={cy + 6}
@@ -53,6 +61,7 @@ export default function FloorPlan({ beds }: { beds: Bed[] }) {
                   fontSize="12"
                   fontWeight="bold"
                   fill="#374151"
+                  pointerEvents="none"
                 >
                   {bed.label}
                 </text>

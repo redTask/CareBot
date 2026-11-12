@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from "vitest"
 import { render, screen } from "@testing-library/react"
+import { BrowserRouter } from "react-router-dom"
 import BedCard from "../components/BedCard"
 import { t, setLang, getLang } from "../lib/i18n"
 
@@ -31,44 +32,76 @@ afterEach(() => {
 
 describe("BedCard", () => {
   it("renders bed label, patient name, and status", () => {
-    render(<BedCard bed={mockBed} />)
+    render(
+      <BrowserRouter>
+        <BedCard bed={mockBed} />
+      </BrowserRouter>
+    )
     expect(screen.getByText("Bed-01")).toBeInTheDocument()
     expect(screen.getByText("Ramesh Kumar")).toBeInTheDocument()
     expect(screen.getAllByText("Normal")[0]).toBeInTheDocument()
   })
 
   it("shows status by colour + icon + text (never colour alone)", () => {
-    const { container } = render(<BedCard bed={mockBed} />)
-    // Status badge has both text and a colored dot
-    expect(container.querySelector('[aria-label="Normal"]')).toBeInTheDocument()
+    render(
+      <BrowserRouter>
+        <BedCard bed={mockBed} />
+      </BrowserRouter>
+    )
+    // Status badge has visible text + icon; the card exposes an accessible name
     expect(screen.getAllByText("Normal")[0]).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", {
+        name: /Bed-01, patient Ramesh Kumar, status Normal/,
+      })
+    ).toBeInTheDocument()
   })
 
   it("shows watch status correctly", () => {
     const watchBed = { ...mockBed, status: "watch" as const }
-    render(<BedCard bed={watchBed} />)
+    render(
+      <BrowserRouter>
+        <BedCard bed={watchBed} />
+      </BrowserRouter>
+    )
     expect(screen.getAllByText("Watch")[0]).toBeInTheDocument()
   })
 
   it("shows critical status correctly", () => {
     const criticalBed = { ...mockBed, status: "critical" as const }
-    render(<BedCard bed={criticalBed} />)
+    render(
+      <BrowserRouter>
+        <BedCard bed={criticalBed} />
+      </BrowserRouter>
+    )
     expect(screen.getAllByText("Critical")[0]).toBeInTheDocument()
   })
 
   it("shows vital reading when available", () => {
-    render(<BedCard bed={mockBed} />)
+    render(
+      <BrowserRouter>
+        <BedCard bed={mockBed} />
+      </BrowserRouter>
+    )
     expect(screen.getByText("SpO₂ 97")).toBeInTheDocument()
   })
 
   it("shows 'No vitals yet' when no vital reading", () => {
     const noVitalBed = { ...mockBed, latest_vital: null }
-    render(<BedCard bed={noVitalBed} />)
+    render(
+      <BrowserRouter>
+        <BedCard bed={noVitalBed} />
+      </BrowserRouter>
+    )
     expect(screen.getByText("No vitals yet")).toBeInTheDocument()
   })
 
   it("is keyboard navigable (tabIndex=0)", () => {
-    const { container } = render(<BedCard bed={mockBed} />)
+    const { container } = render(
+      <BrowserRouter>
+        <BedCard bed={mockBed} />
+      </BrowserRouter>
+    )
     expect(container.firstChild).toHaveAttribute("tabindex", "0")
   })
 })

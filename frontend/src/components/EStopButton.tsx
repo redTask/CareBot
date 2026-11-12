@@ -54,13 +54,13 @@ export default function EStopButton() {
     <div className="flex items-center gap-3">
       {stopped ? (
         <>
-          <span className="text-xs font-bold uppercase tracking-wider text-red-700 bg-red-100 px-2 py-0.5 rounded">
+          <span className="text-xs font-bold uppercase tracking-wider text-red-900 bg-red-100 px-2 py-0.5 rounded">
             {t("robots_stopped")}
           </span>
           <button
             onClick={handleResume}
             disabled={!isNurseOrDoctor}
-            className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all active:scale-[0.98] ${
+            className={`min-h-[40px] px-3 py-2 rounded-xl text-sm font-semibold border transition-all active:scale-[0.98] ${
               !isNurseOrDoctor
                 ? "bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed"
                 : "bg-red-600 text-white border-red-700 hover:bg-red-700"
@@ -83,7 +83,7 @@ export default function EStopButton() {
       {confirming && (
         <button
           onClick={handleEstop}
-          className="px-3 py-1.5 rounded text-xs font-bold bg-red-700 text-white hover:bg-red-800"
+          className="min-h-[40px] px-3 py-2 rounded text-sm font-bold bg-red-700 text-white hover:bg-red-800"
         >
           {t("confirm_stop")}
         </button>

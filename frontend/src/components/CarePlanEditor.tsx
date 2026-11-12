@@ -92,12 +92,12 @@ export default function CarePlanEditor({ patientId }: { patientId: number }) {
                   className="p-3 rounded-xl border bg-gray-50"
                 >
                   <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
-                    {key}
+                    {t(key as any) ?? key}
                   </div>
                   <div className="text-gray-800 text-sm mb-1">
                     {val.min} &ndash; {val.max}
                   </div>
-                  <div className="text-[10px] text-gray-400">
+                  <div className="text-[10px] text-gray-500">
                     {t("critical_range", { min: val.critical_min, max: val.critical_max })}
                   </div>
                 </div>

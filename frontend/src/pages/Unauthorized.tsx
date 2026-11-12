@@ -12,7 +12,7 @@ export default function Unauthorized() {
         </div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">{t("not_authorized")}</h2>
         <p className="text-gray-600 text-sm mb-6">
-          {t("signed_in_as")} <span className="font-semibold capitalize">{user?.role ?? "unknown"}</span>{t("requires_different_role")}
+          {t("signed_in_as")} <span className="font-semibold capitalize">{t(user?.role ?? "nurse")}</span>{t("requires_different_role")}
         </p>
         <button
           onClick={() => window.location.replace("/dashboard")}
