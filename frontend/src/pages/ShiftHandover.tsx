@@ -160,7 +160,7 @@ function ShiftHandover() {
           <h3 className="text-semibold text-[#374151] mb-3">
             {t("patients_affected")}
           </h3>
-          <p className="text-lg text-[#475569]">
+          <p className="text-lg text-[#374151]">
             {stats.patientsAffected}
           </p>
         </div>
