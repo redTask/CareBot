@@ -6,11 +6,25 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_user
+from app.core.timeutils import iso_z, utcnow
 from app.models.robot import Robot
 from app.schemas.robot import RobotOut, RobotUpdate
 from app.ws.manager import manager
 
 router = APIRouter(prefix="/robots", tags=["robots"])
+
+
+def _robot_payload(robot: Robot) -> dict:
+    return {
+        "id": robot.id,
+        "name": robot.name,
+        "status": robot.status,
+        "battery": robot.battery,
+        "x": robot.x,
+        "y": robot.y,
+        "current_task_id": robot.current_task_id,
+        "last_seen": iso_z(robot.last_seen),
+    }
 
 
 @router.get("", response_model=list[RobotOut])
@@ -32,30 +46,25 @@ def update_robot(
     if not robot:
         raise HTTPException(status_code=404, detail="Robot not found")
 
+    # E-stop is authoritative: while a robot is stopped, telemetry may update
+    # its battery but only POST /alerts/resume can un-stop it or move it.
+    if robot.status == "stopped":
+        if update.battery is not None:
+            robot.battery = update.battery
+        robot.last_seen = utcnow()
+        db.commit()
+        db.refresh(robot)
+        return robot
+
     for field, value in update.model_dump(exclude_unset=True).items():
         setattr(robot, field, value)
+    robot.last_seen = utcnow()
     db.commit()
     db.refresh(robot)
 
     try:
         asyncio.get_event_loop().create_task(
-            manager.broadcast(
-                {
-                    "type": "robot",
-                    "data": {
-                        "id": robot.id,
-                        "name": robot.name,
-                        "status": robot.status,
-                        "battery": robot.battery,
-                        "x": robot.x,
-                        "y": robot.y,
-                        "current_task_id": robot.current_task_id,
-                        "last_seen": (
-                            robot.last_seen.isoformat() if robot.last_seen else None
-                        ),
-                    },
-                }
-            )
+            manager.broadcast({"type": "robot", "data": _robot_payload(robot)})
         )
     except RuntimeError:
         pass

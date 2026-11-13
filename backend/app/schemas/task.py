@@ -4,8 +4,10 @@ from datetime import datetime
 from typing import Any
 from pydantic import BaseModel
 
+from app.schemas.base import APIModel
 
-class TaskOut(BaseModel):
+
+class TaskOut(APIModel):
     id: int
     type: str
     priority: str

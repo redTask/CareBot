@@ -1,72 +1,103 @@
+import { useId } from "react"
 import { VitalReading } from "../store/useStore"
 import {
-  LineChart,
-  Line,
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts"
 import { t } from "../lib/i18n"
+import { formatTime } from "../lib/format"
 
-const SERIES_COLOR: Record<string, string> = {
-  heart_rate: "#ef4444",
-  spo2: "#3b82f6",
-  temperature: "#10b981",
+const SERIES: Record<string, { color: string; labelKey: string; unit: string }> = {
+  heart_rate: { color: "#EF4444", labelKey: "heart_rate_label", unit: "bpm" },
+  spo2: { color: "#2F6BFF", labelKey: "spo2_label", unit: "%" },
+  temperature: { color: "#10B981", labelKey: "temperature_label", unit: "°C" },
 }
 
-interface VitalsChartProps {
+export default function VitalsChart({
+  readings,
+  vitalType,
+  range,
+}: {
   readings: VitalReading[]
   vitalType: string
   range: "1h" | "24h"
-}
+}) {
+  const gradientId = `vital-grad-${useId().replace(/:/g, "")}`
+  const series = SERIES[vitalType] ?? SERIES.heart_rate
+  const cutoff = Date.now() - (range === "1h" ? 60 * 60 * 1000 : 24 * 60 * 60 * 1000)
 
-export default function VitalsChart({ readings, vitalType, range }: VitalsChartProps) {
-  const filtered = readings
-    .filter((r) => r.type === vitalType)
+  const data = readings
+    .filter(
+      (reading) =>
+        reading.type === vitalType && new Date(reading.timestamp).getTime() >= cutoff
+    )
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-
-  const data = filtered.map((r) => ({
-    time: new Date(r.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    value: r.value,
-  }))
-
-  const labelMap: Record<string, string> = {
-    heart_rate: t("heart_rate_label"),
-    spo2: t("spo2_label"),
-    temperature: t("temperature_label"),
-  }
+    .map((reading) => ({
+      time: formatTime(reading.timestamp),
+      value: reading.value,
+    }))
 
   if (data.length === 0) {
     return (
-      <div className="h-56 flex flex-col items-center justify-center bg-gray-50 rounded-xl border border-gray-200 text-gray-600">
-        <span className="text-sm">{t("no_readings", { label: labelMap[vitalType] })}</span>
+      <div className="flex h-52 flex-col items-center justify-center rounded-xl border border-dashed border-[#E6EBF2] bg-[#F8FAFC] text-center">
+        <span className="text-sm font-medium text-[#94A3B8]">{t("no_trend_data")}</span>
+        <span className="mt-1 text-xs text-[#CBD5E1]">
+          {t(range === "1h" ? "range_1h" : "range_24h")}
+        </span>
       </div>
     )
   }
 
   return (
-    <div className="h-56">
+    <div className="h-52 w-full" aria-label={t(series.labelKey)}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="time" />
-          <YAxis />
-          <Tooltip />
-          <Line
+        <AreaChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={series.color} stopOpacity={0.35} />
+              <stop offset="100%" stopColor={series.color} stopOpacity={0.02} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E6EBF2" />
+          <XAxis
+            dataKey="time"
+            tick={{ fontSize: 11, fill: "#94A3B8" }}
+            axisLine={false}
+            tickLine={false}
+            minTickGap={24}
+          />
+          <YAxis
+            tick={{ fontSize: 11, fill: "#94A3B8" }}
+            axisLine={false}
+            tickLine={false}
+            width={40}
+            domain={["auto", "auto"]}
+          />
+          <Tooltip
+            contentStyle={{
+              borderRadius: 12,
+              border: "1px solid #E6EBF2",
+              fontSize: 12,
+              color: "#0F172A",
+            }}
+            formatter={(value: number) => [`${value} ${series.unit}`, t(series.labelKey)]}
+          />
+          <Area
             type="monotone"
             dataKey="value"
-            stroke={SERIES_COLOR[vitalType]}
+            stroke={series.color}
             strokeWidth={2}
-            dot={{ fill: SERIES_COLOR[vitalType], strokeWidth: 0 }}
+            fill={`url(#${gradientId})`}
+            dot={false}
+            activeDot={{ r: 4 }}
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
-      <div className="text-xs text-gray-500 mt-3 flex items-center justify-between">
-        <span>{labelMap[vitalType]}</span>
-        <span>{t("range_1h")}</span>
-      </div>
     </div>
   )
 }

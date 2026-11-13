@@ -45,6 +45,28 @@ export async function fetchPatient(patientId: number) {
   return res.json()
 }
 
+export async function fetchVitals(patientId: number, range: "1h" | "24h", limit = 400) {
+  const { token } = useAppStore.getState()
+  const qs = new URLSearchParams({
+    patient_id: String(patientId),
+    range,
+    limit: String(limit),
+  })
+  const res = await fetch(`${API_BASE}/vitals?${qs}`, { headers: headers(token) })
+  if (!res.ok) throw new Error(`fetch vitals failed: ${res.status}`)
+  return res.json()
+}
+
+export async function clearOldTasks() {
+  const { token } = useAppStore.getState()
+  const res = await fetch(`${API_BASE}/tasks/old`, {
+    method: "DELETE",
+    headers: headers(token),
+  })
+  if (!res.ok) throw new Error(`clear tasks failed: ${res.status}`)
+  return res.json()
+}
+
 export async function fetchAlerts(params?: Record<string, string | number>) {
   const { token } = useAppStore.getState()
   const qs = params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""

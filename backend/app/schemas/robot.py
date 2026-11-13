@@ -3,8 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.schemas.base import APIModel
 
-class RobotOut(BaseModel):
+
+class RobotOut(APIModel):
     id: int
     name: str
     status: str

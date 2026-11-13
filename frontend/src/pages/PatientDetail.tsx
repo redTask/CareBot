@@ -1,171 +1,428 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { useAppStore } from "../store/useStore"
-import { fetchPatient, apiRequest, fetchMedicationEvents } from "../lib/api"
+import { useAppStore, MedicationEvent, VitalReading, Alert } from "../store/useStore"
+import {
+  fetchPatient,
+  fetchVitals,
+  fetchMedicationEvents,
+  fetchAlerts,
+} from "../lib/api"
 import VitalsChart from "../components/VitalsChart"
-import MedicationReminder from "../components/MedicationReminder"
+import MedicationReminder, {
+  PatientMedication,
+} from "../components/MedicationReminder"
 import CarePlanEditor from "../components/CarePlanEditor"
-import EStopButton from "../components/EStopButton"
+import AppHeader from "../components/AppHeader"
+import Icon from "../components/Icon"
+import Page from "../components/Page"
+import Card from "../components/Card"
+import SectionHead from "../components/SectionHead"
+import PatientAvatar from "../components/PatientAvatar"
+import EmptyState from "../components/EmptyState"
+import { ChartSkeleton } from "../components/Skeleton"
+import { IllnessArt, illnessForConditions, IllnessKey } from "../components/IllnessArt"
 import { t } from "../lib/i18n"
+import { formatDateTime } from "../lib/format"
+
+type Tab = "overview" | "vitals" | "medication" | "history"
+
+const VITAL_TILES = [
+  { type: "heart_rate", labelKey: "heart_rate", unit: "bpm", icon: "heart-pulse" },
+  { type: "spo2", labelKey: "spo2", unit: "%", icon: "wind" },
+  { type: "temperature", labelKey: "temperature", unit: "°C", icon: "thermometer" },
+] as const
+
+const ORGAN_KEY: Record<IllnessKey, string> = {
+  heart: "organ_heart",
+  lungs: "organ_lungs",
+  diabetes: "organ_diabetes",
+  brain: "organ_brain",
+  kidney: "organ_kidney",
+  default: "organ_general",
+}
+
+const SEVERITY_TONE: Record<string, string> = {
+  critical: "bg-critical-light text-critical-dark",
+  watch: "bg-watch-light text-watch-dark",
+  info: "bg-brand-tint text-[#1F55D6]",
+}
+
+function nextMedicine(medications: PatientMedication[]): string | null {
+  const now = new Date()
+  const minutesNow = now.getHours() * 60 + now.getMinutes()
+  let best: { minutes: number; label: string } | null = null
+  for (const medication of medications) {
+    for (const time of medication.schedule_times ?? []) {
+      const [hour, minute] = time.split(":").map(Number)
+      if (Number.isNaN(hour) || Number.isNaN(minute)) continue
+      const minutes = hour * 60 + minute
+      if (minutes >= minutesNow && (!best || minutes < best.minutes)) {
+        best = { minutes, label: time }
+      }
+    }
+  }
+  return best?.label ?? null
+}
 
 export default function PatientDetail() {
   const { patientId } = useParams<{ patientId: string }>()
   const navigate = useNavigate()
   const setPatient = useAppStore((state) => state.setPatient)
   const patients = useAppStore((state) => state.patients)
-  const latestVitals = useAppStore((state) => state.latestVitals)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  const storeVitals = useAppStore((state) => state.latestVitals)
 
   const id = patientId ? Number(patientId) : NaN
-  const patient = patients[id]
-  const [readings, setReadings] = useState<any[]>([])
+  const patient = Number.isNaN(id) ? undefined : patients[id]
+
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [tab, setTab] = useState<Tab>("overview")
+  const [range, setRange] = useState<"1h" | "24h">("1h")
+  const [vitalType, setVitalType] = useState<string>("heart_rate")
+  const [readings, setReadings] = useState<VitalReading[]>([])
+  const [eventRows, setEventRows] = useState<MedicationEvent[]>([])
+  const [patientAlerts, setPatientAlerts] = useState<Alert[]>([])
+  const [vitalsLoading, setVitalsLoading] = useState(true)
 
   useEffect(() => {
-    if (!id || isNaN(id)) return
+    if (!id || Number.isNaN(id)) return
     let mounted = true
-    const load = async () => {
-      setLoading(true)
+    ;(async () => {
       try {
-        const [patientData, vitalData, medEvents] = await Promise.all([
+        const [patientData, events, alerts] = await Promise.all([
           fetchPatient(id),
-          apiRequest(`/vitals?patient_id=${id}&limit=200`),
           fetchMedicationEvents({ patient_id: id }),
+          fetchAlerts({ patient_id: id }),
         ])
-        if (mounted) {
-          setPatient(patientData)
-          setReadings(vitalData)
-          setError("")
-        }
+        if (!mounted) return
+        setPatient(patientData)
+        setEventRows(events)
+        setPatientAlerts(alerts)
+        setError("")
       } catch (err: any) {
         if (mounted) setError(err.message || t("error"))
       } finally {
         if (mounted) setLoading(false)
       }
-    }
-    load()
+    })()
     return () => {
       mounted = false
     }
   }, [id, setPatient])
 
+  const loadVitals = useCallback(
+    async (targetRange: "1h" | "24h") => {
+      if (!id || Number.isNaN(id)) return
+      setVitalsLoading(true)
+      try {
+        setReadings(await fetchVitals(id, targetRange, 400))
+      } catch (err) {
+        console.error("Failed to load vitals", err)
+      } finally {
+        setVitalsLoading(false)
+      }
+    },
+    [id]
+  )
+
+  useEffect(() => {
+    loadVitals(range)
+  }, [range, loadVitals])
+
+  const reloadEvents = useCallback(async () => {
+    if (!id) return
+    try {
+      setEventRows(await fetchMedicationEvents({ patient_id: id }))
+    } catch (err) {
+      console.error("Failed to reload medication events", err)
+    }
+  }, [id])
+
+  const latestByType = useMemo(() => {
+    const map: Record<string, VitalReading> = {}
+    for (const reading of readings) {
+      if (!map[reading.type]) map[reading.type] = reading
+    }
+    return map
+  }, [readings])
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-        <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="text-sm text-gray-500">{t("loading_patient")}</p>
-        </div>
-      </div>
-    )
-  }
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6 text-center">
-        <div className="bg-white rounded-3xl shadow border border-red-200 p-8">
-          <div className="w-12 h-12 rounded-full bg-[#FDE8E8] flex items-center justify-center text-[#DC2626] text-xl font-bold mx-auto mb-4">
-            <Icon name="alert-circle" size={20} className="text-[#DC2626]" />
+      <Page>
+        <AppHeader active="dashboard" />
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 w-40 rounded bg-[#E6EBF2]" />
+            <div className="h-56 rounded-2xl bg-white" />
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="h-32 rounded-2xl bg-white" />
+              <div className="h-32 rounded-2xl bg-white" />
+              <div className="h-32 rounded-2xl bg-white" />
+            </div>
           </div>
-          <h2 className="text-red-700 font-bold text-lg mb-2">{t("error")}</h2>
-          <p className="text-gray-600 text-sm mb-6">{error}</p>
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700"
-          >
-            {t("back_to_dashboard_btn")}
-          </button>
-        </div>
-      </div>
-    )
-  }
-  if (!patient) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6 text-center text-gray-500 text-sm">
-        {t("patient_not_found")}
-      </div>
+        </main>
+      </Page>
     )
   }
 
-  const hrReadings = readings.filter((r) => r.type === "heart_rate")
-  const spo2Readings = readings.filter((r) => r.type === "spo2")
-  const tempReadings = readings.filter((r) => r.type === "temperature")
+  if (error || !patient) {
+    return (
+      <Page>
+        <AppHeader active="dashboard" />
+        <main className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center px-4">
+          <Card hoverable={false} className="w-full max-w-sm text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-critical-light text-critical-dark">
+              <Icon name="alert-circle" size={20} />
+            </div>
+            <h2 className="mb-2 text-lg font-bold text-critical-dark">{t("error")}</h2>
+            <p className="mb-6 text-sm text-[#475569]">{error || t("patient_not_found")}</p>
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              className="min-h-[44px] w-full rounded-xl bg-brand px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+            >
+              {t("back_to_dashboard_btn")}
+            </button>
+          </Card>
+        </main>
+      </Page>
+    )
+  }
+
+  const conditions = (patient.conditions ?? "")
+    .split(",")
+    .map((condition) => condition.trim())
+    .filter(Boolean)
+  const illness = illnessForConditions(patient.conditions)
+  const organKey = ORGAN_KEY[illness]
+  const medications: PatientMedication[] = patient.medications ?? []
+  const next = nextMedicine(medications)
+
+  const tabs: Array<{ key: Tab; label: string }> = [
+    { key: "overview", label: t("tab_overview") },
+    { key: "vitals", label: t("tab_vitals") },
+    { key: "medication", label: t("tab_medication") },
+    { key: "history", label: t("tab_history") },
+  ]
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8">
-      <nav className="mb-8">
+    <Page>
+      <AppHeader active="dashboard" />
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <button
+          type="button"
           onClick={() => navigate("/dashboard")}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-[#2F6BFF] hover:text-[#1F55D6]"
+          className="mb-4 inline-flex min-h-[40px] items-center gap-2 rounded-xl px-2 text-sm font-semibold text-brand transition-colors hover:bg-brand-tint"
         >
-          <Icon name="arrow-left" size={16} className="text-[#2F6BFF]" />
+          <Icon name="arrow-left" size={16} />
           {t("back_to_dashboard_btn")}
         </button>
-      </nav>
 
-      <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg">
-            {patient.name.charAt(0)}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">{patient.name}</h1>
-            <p className="text-gray-600 text-sm">
-              {t("age_sex", { age: patient.age, sex: patient.sex })} •
-              {patient.bed_id != null ? t("bed_x", { id: patient.bed_id }) : t("no_bed_assigned")}
-            </p>
-          </div>
-        </div>
-        <EStopButton />
-        {patient.conditions && (
-          <p className="mt-2 text-[10px] text-gray-500">{t("conditions_label")} {patient.conditions}</p>
-        )}
-        {latestVitals[id] && (
-          <div className="mt-4 flex gap-4">
-            {[
-              { label: t("heart_rate"), type: "heart_rate" },
-              { label: t("spo2"), type: "spo2" },
-              { label: t("temperature"), type: "temperature" },
-            ].map((item) => {
-              const v = latestVitals[id]
-              if (v.type !== item.type) return null
-              return (
-                <div
-                  key={item.type}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl border bg-white text-sm font-semibold"
-                >
-                  <span className="text-gray-500">{item.label}</span>
-                  <span className="text-gray-800">{v.value}</span>
+        <Card hoverable={false} className="mb-5 overflow-hidden">
+          <div className="grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_260px]">
+            <div className="min-w-0">
+              <div className="flex items-center gap-4">
+                <PatientAvatar name={patient.name} size={64} />
+                <div className="min-w-0">
+                  <h1 className="truncate font-heading text-2xl font-bold text-[#0F172A]">
+                    {patient.name}
+                  </h1>
+                  <p className="mt-1 text-sm text-[#475569]">
+                    {t("age_sex", { age: patient.age, sex: patient.sex })} •{" "}
+                    {patient.bed_id != null
+                      ? t("bed_x", { id: patient.bed_id })
+                      : t("no_bed_assigned")}
+                  </p>
                 </div>
-              )
-            })}
+              </div>
+
+              {conditions.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {conditions.map((condition) => (
+                    <span
+                      key={condition}
+                      className="rounded-full bg-brand-tint px-2.5 py-1 text-[11px] font-semibold text-[#1F55D6]"
+                    >
+                      {condition}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <h2 className="mt-6 max-w-md font-heading text-xl font-semibold leading-snug text-[#0F172A] sm:text-2xl">
+                {t("general_indicators", { organ: t(organKey) })}
+              </h2>
+            </div>
+
+            <div className="mx-auto w-full max-w-[260px]">
+              <div className="flex aspect-square items-center justify-center rounded-full bg-[#EAF0FF] p-7 ring-1 ring-[#BFD3FF]">
+                <IllnessArt kind={illness} className="max-w-[190px]" />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <div className="mb-4 flex flex-wrap gap-1 rounded-xl border border-[#E6EBF2] bg-white p-1">
+          {tabs.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setTab(item.key)}
+              aria-pressed={tab === item.key}
+              className={[
+                "min-h-[40px] rounded-lg px-4 text-sm font-semibold transition-colors",
+                tab === item.key
+                  ? "bg-brand-tint text-[#1F55D6]"
+                  : "text-[#475569] hover:bg-[#F1F4F9]",
+              ].join(" ")}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "overview" && (
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {VITAL_TILES.map((tile) => {
+                const reading = latestByType[tile.type] ?? storeVitals[patient.id]
+                return (
+                  <Card key={tile.type} hoverable={false} className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-tint text-brand">
+                      <Icon name={tile.icon as any} size={24} />
+                    </span>
+                    <div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                        {t(tile.labelKey)}
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-mono text-2xl font-bold text-[#0F172A]">
+                          {reading ? reading.value.toFixed(tile.type === "temperature" ? 1 : 0) : "—"}
+                        </span>
+                        <span className="text-xs text-[#94A3B8]">{tile.unit}</span>
+                      </div>
+                    </div>
+                  </Card>
+                )
+              })}
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+              <Card hoverable={false}>
+                <SectionHead title={t("next_medicine_title")} />
+                <div className="flex items-center gap-3 rounded-xl border border-[#E6EBF2] bg-[#F8FAFC] p-4">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-tint text-brand">
+                    <Icon name="pill" size={20} />
+                  </span>
+                  <div>
+                    <div className="text-sm font-semibold text-[#0F172A]">
+                      {next ?? t("no_upcoming_medicine")}
+                    </div>
+                    <div className="mt-0.5 text-xs text-[#94A3B8]">
+                      {medications.length > 0
+                        ? `${medications.length} ${t("medications")}`
+                        : t("no_medications_scheduled")}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+              <CarePlanEditor patientId={patient.id} />
+            </div>
           </div>
         )}
-      </header>
 
-      <section className="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-          <h3 className="font-bold text-gray-800 text-base mb-4">{t("heart_rate_label")}</h3>
-          <VitalsChart readings={hrReadings} vitalType="heart_rate" range="1h" />
-        </div>
-        <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-          <h3 className="font-bold text-gray-800 text-base mb-4">{t("spo2_label")}</h3>
-          <VitalsChart readings={spo2Readings} vitalType="spo2" range="1h" />
-        </div>
-        <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-          <h3 className="font-bold text-gray-800 text-base mb-4">{t("temperature_label")}</h3>
-          <VitalsChart readings={tempReadings} vitalType="temperature" range="1h" />
-        </div>
-      </section>
+        {tab === "vitals" && (
+          <Card hoverable={false}>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-1.5">
+                {VITAL_TILES.map((tile) => (
+                  <button
+                    key={tile.type}
+                    type="button"
+                    onClick={() => setVitalType(tile.type)}
+                    aria-pressed={vitalType === tile.type}
+                    className={[
+                      "min-h-[40px] rounded-xl px-3 text-xs font-semibold transition-colors",
+                      vitalType === tile.type
+                        ? "bg-brand text-white"
+                        : "border border-[#E6EBF2] bg-white text-[#475569] hover:bg-[#F1F4F9]",
+                    ].join(" ")}
+                  >
+                    {t(tile.labelKey)}
+                  </button>
+                ))}
+              </div>
+              <div className="flex rounded-xl border border-[#E6EBF2] bg-[#F1F4F9] p-0.5">
+                {(["1h", "24h"] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setRange(value)}
+                    aria-pressed={range === value}
+                    className={[
+                      "min-h-[36px] rounded-lg px-3 text-xs font-semibold transition-colors",
+                      range === value
+                        ? "bg-white text-[#1F55D6] shadow-sm"
+                        : "text-[#64748B]",
+                    ].join(" ")}
+                  >
+                    {t(value === "1h" ? "range_1h" : "range_24h")}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {vitalsLoading ? (
+              <ChartSkeleton className="border-0 p-0" />
+            ) : (
+              <VitalsChart readings={readings} vitalType={vitalType} range={range} />
+            )}
+          </Card>
+        )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-          <MedicationReminder patientId={patient.id} />
-        </div>
+        {tab === "medication" && (
+          <MedicationReminder
+            patientId={patient.id}
+            medications={medications}
+            events={eventRows}
+            onChanged={reloadEvents}
+          />
+        )}
 
-        <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-          <CarePlanEditor patientId={patient.id} />
-        </div>
-      </div>
-    </div>
+        {tab === "history" && (
+          <Card hoverable={false}>
+            <SectionHead title={t("patient_alerts")} />
+            {patientAlerts.length === 0 ? (
+              <EmptyState icon="bell" title={t("no_alerts_for_patient")} />
+            ) : (
+              <div className="space-y-2.5">
+                {patientAlerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className="rounded-xl border border-[#E6EBF2] p-3"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                          SEVERITY_TONE[alert.severity] ?? SEVERITY_TONE.info
+                        }`}
+                      >
+                        {t(`severity_${alert.severity}`)}
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                        {alert.status}
+                      </span>
+                      <span className="ml-auto text-[10px] text-[#94A3B8]">
+                        {formatDateTime(alert.created_at)}
+                      </span>
+                    </div>
+                    <p className="mt-1.5 text-sm text-[#0F172A]">{alert.message}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
+      </main>
+    </Page>
   )
 }

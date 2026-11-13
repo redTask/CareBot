@@ -3,11 +3,12 @@ import { BrowserRouter } from "react-router-dom"
 import { useAppStore } from "./store/useStore"
 import RoutesComponent from "./routes"
 import { API_BASE } from "./lib/api"
-import { initLang, getLang, setLang } from "./lib/i18n"
+import { connectWS, disconnectWS } from "./lib/ws"
+import { initLang } from "./lib/i18n"
 
 export default function App() {
-  const { isAuthenticated, user, setAuth, logout, token } =
-    useAppStore.getState()
+  const { isAuthenticated, user, setAuth, logout } = useAppStore.getState()
+  const token = useAppStore((state) => state.token)
 
   useEffect(() => {
     // Initialize language from localStorage
@@ -31,6 +32,14 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // One live socket for the whole app, so every page shows the true
+  // connection status and receives live vitals/alerts.
+  useEffect(() => {
+    if (!token) return
+    connectWS(API_BASE.replace(/^http/, "ws"), token)
+    return () => disconnectWS()
+  }, [token])
 
   return (
     <BrowserRouter>

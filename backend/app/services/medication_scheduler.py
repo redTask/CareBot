@@ -9,6 +9,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.core.timeutils import iso_z, utcnow
 from app.db.session import SessionLocal, engine
 from app.models.medication import Medication
 from app.models.medication_event import MedicationEvent
@@ -37,7 +38,7 @@ async def run_medication_scheduler(stop_event: asyncio.Event) -> None:
 
 
 def _process_due_medications(db: Session) -> None:
-    now = datetime.now(timezone.utc)
+    now = utcnow()
     current_time = now.time().replace(second=0, microsecond=0)
     today = now.date()
 
@@ -52,7 +53,11 @@ def _process_due_medications(db: Session) -> None:
             try:
                 schedule_time = time.fromisoformat(schedule_time_str)
             except ValueError:  # noqa: BLE001
-                continue
+                # Older seed rows stored a full ISO datetime instead of HH:MM.
+                try:
+                    schedule_time = datetime.fromisoformat(schedule_time_str).time()
+                except ValueError:
+                    continue
 
             # Does this scheduled time fall in the current minute window?
             if schedule_time.hour != current_time.hour or schedule_time.minute != current_time.minute:
@@ -123,7 +128,7 @@ def acknowledge_medication_event(
         return event
 
     event.status = "acknowledged"
-    event.acknowledged_at = datetime.now(timezone.utc)
+    event.acknowledged_at = utcnow()
     db.commit()
     db.refresh(event)
 
@@ -230,11 +235,9 @@ def _broadcast_medication_event(
                         "patient_name": patient.name if patient else None,
                         "drug": med.drug if med else None,
                         "dose": med.dose if med else None,
-                        "due_at": event.due_at.isoformat() if event.due_at else None,
+                        "due_at": iso_z(event.due_at),
                         "status": event.status,
-                        "acknowledged_at": event.acknowledged_at.isoformat()
-                        if event.acknowledged_at
-                        else None,
+                        "acknowledged_at": iso_z(event.acknowledged_at),
                         "acknowledged": acknowledged,
                         "missed": missed,
                     },

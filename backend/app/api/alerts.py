@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_db, get_current_user, require_role
+from app.core.timeutils import iso_z, utcnow
 from app.models.alert import Alert
 from app.models.robot import Robot
 from app.models.task import Task
@@ -52,9 +52,7 @@ def acknowledge_alert(
 
     alert.status = "acknowledged"
     alert.acknowledged_by = current_user.id
-    alert.acknowledged_at = __import__("datetime").datetime.now(
-        __import__("datetime").timezone.utc
-    )
+    alert.acknowledged_at = utcnow()
     db.commit()
     db.refresh(alert)
 
@@ -70,9 +68,7 @@ def acknowledge_alert(
                         "id": alert.id,
                         "status": "acknowledged",
                         "acknowledged_by": alert.acknowledged_by,
-                        "acknowledged_at": alert.acknowledged_at.isoformat()
-                        if alert.acknowledged_at
-                        else None,
+                        "acknowledged_at": iso_z(alert.acknowledged_at),
                     },
                 }
             )
@@ -162,9 +158,7 @@ def patient_call(
                         "message": alert.message,
                         "status": alert.status,
                         "escalation_level": alert.escalation_level,
-                        "created_at": alert.created_at.isoformat()
-                        if alert.created_at
-                        else None,
+                        "created_at": iso_z(alert.created_at),
                     },
                 }
             )
@@ -199,6 +193,7 @@ def emergency_stop(
     robots = db.query(Robot).all()
     for robot in robots:
         robot.status = "stopped"
+        robot.current_task_id = None
 
     running_tasks = (
         db.query(Task)
@@ -237,9 +232,7 @@ def emergency_stop(
                         "message": alert.message,
                         "status": alert.status,
                         "escalation_level": alert.escalation_level,
-                        "created_at": alert.created_at.isoformat()
-                        if alert.created_at
-                        else None,
+                        "created_at": iso_z(alert.created_at),
                     },
                 }
             )
@@ -288,6 +281,7 @@ def resume(
     robots = db.query(Robot).filter(Robot.status == "stopped").all()
     for robot in robots:
         robot.status = "idle"
+        robot.current_task_id = None
 
     alert = Alert(
         type="resume",
@@ -318,9 +312,7 @@ def resume(
                         "message": alert.message,
                         "status": alert.status,
                         "escalation_level": alert.escalation_level,
-                        "created_at": alert.created_at.isoformat()
-                        if alert.created_at
-                        else None,
+                        "created_at": iso_z(alert.created_at),
                     },
                 }
             )
@@ -335,6 +327,19 @@ def resume(
                     "type": "estop_resumed",
                     "data": {
                         "robots": [r.id for r in robots],
+                        "robot_rows": [
+                            {
+                                "id": r.id,
+                                "name": r.name,
+                                "status": r.status,
+                                "battery": r.battery,
+                                "x": r.x,
+                                "y": r.y,
+                                "current_task_id": r.current_task_id,
+                                "last_seen": iso_z(r.last_seen),
+                            }
+                            for r in robots
+                        ],
                     },
                 }
             )

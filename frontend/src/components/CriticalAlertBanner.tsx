@@ -1,26 +1,30 @@
+import { useState } from "react"
 import { useAppStore } from "../store/useStore"
 import { acknowledgeAlert } from "../lib/api"
 import { t } from "../lib/i18n"
 import Icon from "./Icon"
 
+const RANK: Record<string, number> = { critical: 0, watch: 1, info: 2 }
+
 export default function CriticalAlertBanner() {
-  const { alerts, acknowledgeAlert: ackAlert, user } = useAppStore()
+  const alerts = useAppStore((state) => state.alerts)
+  const ackAlert = useAppStore((state) => state.acknowledgeAlert)
+  const user = useAppStore((state) => state.user)
+  const [dismissedId, setDismissedId] = useState<number | null>(null)
 
-  const criticalAlerts = alerts.filter(
-    (a) => a.severity === "critical" && a.status === "open"
-  )
-  const watchAlerts = alerts.filter(
-    (a) => a.severity === "watch" && a.status === "open"
-  )
+  const open = alerts
+    .filter((alert) => alert.status === "open" && alert.severity !== "info")
+    .sort((a, b) => (RANK[a.severity] ?? 9) - (RANK[b.severity] ?? 9))
 
-  if (alerts.length === 0) return null
+  const alert = open[0]
+  if (!alert || alert.id === dismissedId) return null
 
-  const hasCritical = criticalAlerts.length > 0
+  const critical = alert.severity === "critical"
 
-  const handleAcknowledge = async (id: number) => {
+  const handleAcknowledge = async () => {
     try {
-      await acknowledgeAlert(id)
-      ackAlert(id, user?.id ?? null)
+      await acknowledgeAlert(alert.id)
+      ackAlert(alert.id, user?.id ?? null)
     } catch (err) {
       console.error("Failed to acknowledge alert", err)
     }
@@ -28,52 +32,46 @@ export default function CriticalAlertBanner() {
 
   return (
     <div
-      className={`fixed inset-x-0 bottom-0 z-50 px-4 py-3 ${
-        hasCritical
-          ? "bg-[#DC2626] text-white border-b border-[#B91C1C] animate-pulse shadow-lg"
-          : "bg-[#FEF3C7] text-[#854D0E] border-b border-[#FCD34D] shadow-sm"
-      }`}
       role="alert"
       aria-live="polite"
+      className={[
+        "border-b",
+        critical
+          ? "border-[#FCA5A5] bg-critical-light text-critical-dark"
+          : "border-[#FCD34D] bg-watch-light text-[#854D0E]",
+      ].join(" ")}
     >
-      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {hasCritical && (
-            <span className="bg-[#B91C1C] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">
-              {t("severity_critical")}
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
+        <Icon name={critical ? "alert-triangle" : "alert-circle"} size={20} className="shrink-0" />
+        <p className="min-w-0 flex-1 truncate text-sm font-semibold">
+          <span className="mr-2 rounded bg-white/70 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+            {t(critical ? "severity_critical" : "severity_watch")}
+          </span>
+          {alert.message}
+          {open.length > 1 && (
+            <span className="ml-2 font-normal opacity-80">
+              (+{open.length - 1})
             </span>
           )}
-          <span className={`font-semibold ${hasCritical ? "text-[#FCA5A5]" : "text-[#854D0E]"}`}>
-            {hasCritical
-              ? criticalAlerts.length === 1
-                ? t("critical_alerts", { count: criticalAlerts.length })
-                : t("critical_alerts_plural", { count: criticalAlerts.length })
-              : watchAlerts.length === 1
-                ? t("watch_alerts", { count: watchAlerts.length })
-                : t("watch_alerts_plural", { count: watchAlerts.length })}
-          </span>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {[...criticalAlerts, ...watchAlerts]
-            .slice(0, 5)
-            .map((a) => (
-              <button
-                key={a.id}
-                onClick={() => handleAcknowledge(a.id)}
-                disabled={a.status !== "open"}
-                className={`min-h-[40px] px-3 py-2 rounded text-sm font-semibold border transition-all duration-150 ${
-                  a.severity === "critical"
-                    ? "bg-[#DC2626] text-white border-[#B91C1C] hover:bg-[#B91C1C] disabled:opacity-60"
-                    : "bg-[#D97706] text-white border-[#B45309] hover:bg-[#B45309] disabled:opacity-60"
-                }`}
-              >
-                <Icon name="alert-circle" size={16} className="mr-1.5 opacity-80" aria-hidden="true" />
-                {t("acknowledge")} •
-                {a.patient_id != null ? t("patient_x", { id: a.patient_id }) : t("system")}
-              </button>
-            ))}
-        </div>
+        </p>
+        <button
+          type="button"
+          onClick={handleAcknowledge}
+          className={[
+            "inline-flex min-h-[40px] shrink-0 items-center rounded-lg px-3 text-xs font-bold text-white transition-colors",
+            critical ? "bg-[#B91C1C] hover:bg-[#991B1B]" : "bg-[#B45309] hover:bg-[#92400E]",
+          ].join(" ")}
+        >
+          {t("acknowledge")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setDismissedId(alert.id)}
+          aria-label={t("dismiss")}
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-current/70 hover:bg-white/50"
+        >
+          <Icon name="x-circle" size={20} />
+        </button>
       </div>
     </div>
   )

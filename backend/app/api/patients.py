@@ -10,7 +10,7 @@ from app.models.care_plan import CarePlan
 from app.models.medication import Medication
 from app.models.patient import Patient
 from app.models.vital_reading import VitalReading
-from app.schemas.patient import PatientOut
+from app.schemas.patient import CarePlanOut, MedicationOut, PatientOut
 
 router = APIRouter(prefix="/patients", tags=["patients"])
 

@@ -16,6 +16,26 @@ const mockBed = {
     sex: "M",
     conditions: "Hypertension, Diabetes",
   },
+  latest_vitals: {
+    spo2: {
+      type: "spo2",
+      value: 97,
+      quality: "good",
+      timestamp: "2026-11-11T09:00:00Z",
+    },
+    heart_rate: {
+      type: "heart_rate",
+      value: 78,
+      quality: "good",
+      timestamp: "2026-11-11T09:00:00Z",
+    },
+    temperature: {
+      type: "temperature",
+      value: 36.8,
+      quality: "good",
+      timestamp: "2026-11-11T09:00:00Z",
+    },
+  },
   latest_vital: {
     type: "spo2",
     value: 97,
@@ -77,22 +97,25 @@ describe("BedCard", () => {
     expect(screen.getAllByText("Critical")[0]).toBeInTheDocument()
   })
 
-  it("shows vital reading when available", () => {
+  it("shows all three vitals when available", () => {
     render(
       <BrowserRouter>
         <BedCard bed={mockBed} />
       </BrowserRouter>
     )
-    expect(screen.getByText("SpO₂ 97")).toBeInTheDocument()
+    expect(screen.getByText("97")).toBeInTheDocument()
+    expect(screen.getByText("78")).toBeInTheDocument()
+    expect(screen.getByText("36.8")).toBeInTheDocument()
   })
 
-  it("shows 'No vitals yet' when no vital reading", () => {
-    const noVitalBed = { ...mockBed, latest_vital: null }
+  it("shows an empty state for an unoccupied bed", () => {
+    const emptyBed = { ...mockBed, patient: null, latest_vitals: {}, latest_vital: null }
     render(
       <BrowserRouter>
-        <BedCard bed={noVitalBed} />
+        <BedCard bed={emptyBed} />
       </BrowserRouter>
     )
+    expect(screen.getByText("Unoccupied")).toBeInTheDocument()
     expect(screen.getByText("No vitals yet")).toBeInTheDocument()
   })
 

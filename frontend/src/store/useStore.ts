@@ -52,6 +52,7 @@ export interface Bed {
   x: number
   y: number
   patient: BedPatient | null
+  latest_vitals?: Record<string, LatestVital>
   latest_vital: LatestVital | null
   status: string
   last_checked: string | null
@@ -173,13 +174,32 @@ export const useAppStore = create<AppState>()(
         upsertVital: (vital) =>
           set((state) => {
             const latest = { ...state.latestVitals }
-            latest[vital.patient_id] = {
+            const entry = {
               type: vital.type,
               value: vital.value,
               quality: vital.quality,
               timestamp: vital.timestamp,
             }
-            return { latestVitals: latest, lastUpdated: new Date().toISOString() }
+            latest[vital.patient_id] = entry
+            // Keep the bed card in sync without a refetch.
+            const beds = state.beds.map((bed) =>
+              bed.patient?.id === vital.patient_id
+                ? {
+                    ...bed,
+                    latest_vital: entry,
+                    latest_vitals: {
+                      ...(bed.latest_vitals ?? {}),
+                      [vital.type]: entry,
+                    },
+                    last_checked: vital.timestamp,
+                  }
+                : bed
+            )
+            return {
+              latestVitals: latest,
+              beds,
+              lastUpdated: new Date().toISOString(),
+            }
           }),
         upsertRobot: (robot) =>
           set((state) => {

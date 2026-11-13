@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom"
 import { apiRequest } from "../lib/api"
 import { useAppStore } from "../store/useStore"
 import { t } from "../lib/i18n"
+import Page from "../components/Page"
+import Card from "../components/Card"
+import Btn from "../components/Btn"
+import Icon from "../components/Icon"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -39,77 +43,97 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white rounded-xl shadow border border-gray-200 p-6 w-full max-w-sm sm:max-w-md">
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xl font-bold mx-auto mb-3">
-            CB
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800">{t("app_name")}</h2>
-          <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider font-medium">
-            {t("tagline")}
-          </p>
-          <p className="text-[10px] text-gray-600 mt-0.5 italic">{t("research_prototype")}</p>
-        </div>
-
-        {error && (
-          <div className="p-2 rounded text-sm text-red-800 bg-red-50 border border-red-100 mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">{t("email")}</label>
-            <input
-              type="email"
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">{t("password")}</label>
-            <input
-              type="password"
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
-          >
-            {loading ? t("signing_in") : t("sign_in")}
-          </button>
-        </form>
-
-        <div className="mt-6 pt-4 border-t border-gray-100">
-          <p className="text-[10px] text-gray-500 mb-2 uppercase tracking-wider font-medium">
-            {t("demo_accounts")}
-          </p>
-          <div className="space-y-1">
-            <div className="text-[10px] text-gray-600 flex justify-between">
-              <span className="font-medium">{t("nurse")}</span>
-              <span className="text-gray-500">nurse@carebot.in / nurse123</span>
+    <Page>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#EAF0FF] via-[#F1F4F9] to-[#E8F7EE] px-4 py-10">
+        <div className="w-full max-w-sm">
+          <Card padded={false} hoverable={false} className="p-6 sm:p-8 shadow-md">
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-tint text-brand">
+                <Icon name="heart-pulse" size={24} />
+              </div>
+              <h1 className="text-2xl font-semibold font-heading text-[#0F172A]">
+                {t("app_name")}
+              </h1>
+              <p className="mt-1 text-xs font-medium uppercase tracking-wider text-[#94A3B8]">
+                {t("tagline")}
+              </p>
+              <p className="mt-2 text-[10px] italic text-[#94A3B8]">
+                {t("research_prototype")}
+              </p>
             </div>
-            <div className="text-[10px] text-gray-600 flex justify-between">
-              <span className="font-medium">{t("doctor")}</span>
-              <span className="text-gray-500">doctor@carebot.in / doctor123</span>
+
+            {error && (
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border border-[#FECACA] bg-critical-light px-3 py-2 text-sm text-critical-dark"
+              >
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="login-email"
+                  className="mb-1.5 block text-xs font-semibold text-[#475569]"
+                >
+                  {t("email")}
+                </label>
+                <input
+                  id="login-email"
+                  type="email"
+                  className="w-full rounded-xl border border-[#E6EBF2] px-3 py-2.5 text-sm text-[#0F172A] outline-none transition-all duration-150 focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="login-password"
+                  className="mb-1.5 block text-xs font-semibold text-[#475569]"
+                >
+                  {t("password")}
+                </label>
+                <input
+                  id="login-password"
+                  type="password"
+                  className="w-full rounded-xl border border-[#E6EBF2] px-3 py-2.5 text-sm text-[#0F172A] outline-none transition-all duration-150 focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+              <Btn type="submit" disabled={loading} className="w-full">
+                {loading ? t("signing_in") : t("sign_in")}
+              </Btn>
+            </form>
+
+            <div className="mt-6 border-t border-[#E6EBF2] pt-4">
+              <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-[#94A3B8]">
+                {t("demo_accounts")}
+              </p>
+              <div className="space-y-1.5">
+                {[
+                  { role: t("nurse"), account: "nurse@carebot.in / nurse123" },
+                  { role: t("doctor"), account: "doctor@carebot.in / doctor123" },
+                  { role: t("admin"), account: "admin@carebot.in / admin123" },
+                ].map((demo) => (
+                  <div
+                    key={demo.account}
+                    className="flex items-center justify-between gap-3 text-[10px] text-[#475569]"
+                  >
+                    <span className="font-semibold">{demo.role}</span>
+                    <span className="font-mono text-[#94A3B8]">{demo.account}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="text-[10px] text-gray-600 flex justify-between">
-              <span className="font-medium">{t("admin")}</span>
-              <span className="text-gray-500">admin@carebot.in / admin123</span>
-            </div>
-          </div>
+          </Card>
         </div>
       </div>
-    </div>
+    </Page>
   )
 }

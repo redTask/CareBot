@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import desc, func
+from sqlalchemy import desc
 
 from app.api.deps import get_db, get_current_user
 from app.models.bed import Bed
@@ -23,13 +21,13 @@ DEFAULT_THRESHOLDS = {
 
 
 def _status_for_readings(readings, thresholds=DEFAULT_THRESHOLDS):
-    """Determine bed status from latest readings: normal | watch | critical."""
-    if not readings:
-        return "normal", None
+    """Determine bed status from the latest reading of each vital type."""
     latest_by_type: dict[str, object] = {}
     for r in readings:
         if r.type not in latest_by_type:
             latest_by_type[r.type] = r
+    if not latest_by_type:
+        return "normal", None
     critical = False
     watch = False
     last_checked = None
@@ -67,45 +65,7 @@ def list_beds(
     result = []
     for bed in beds:
         patient = bed.patient
-        readings = (
-            db.query(VitalReading)
-            .filter(VitalReading.patient_id == patient.id)
-            .order_by(desc(VitalReading.timestamp))
-            .limit(5)
-            .all()
-        )
-        if patient:
-            status, last_checked = _status_for_readings(readings)
-            latest = readings[0] if readings else None
-            latest_vital = (
-                {
-                    "type": latest.type,
-                    "value": latest.value,
-                    "quality": latest.quality,
-                    "timestamp": latest.timestamp,
-                }
-                if latest
-                else None
-            )
-            result.append(
-                BedOut(
-                    id=bed.id,
-                    label=bed.label,
-                    x=bed.x,
-                    y=bed.y,
-                    patient={
-                        "id": patient.id,
-                        "name": patient.name,
-                        "age": patient.age,
-                        "sex": patient.sex,
-                        "conditions": patient.conditions,
-                    },
-                    latest_vital=latest_vital,
-                    status=status,
-                    last_checked=last_checked.isoformat() if last_checked else None,
-                )
-            )
-        else:
+        if not patient:
             result.append(
                 BedOut(
                     id=bed.id,
@@ -113,9 +73,64 @@ def list_beds(
                     x=bed.x,
                     y=bed.y,
                     patient=None,
+                    latest_vitals={},
                     latest_vital=None,
                     status="normal",
                     last_checked=None,
                 )
             )
+            continue
+
+        # Enough rows to cover the latest reading of every vital type.
+        readings = (
+            db.query(VitalReading)
+            .filter(VitalReading.patient_id == patient.id)
+            .order_by(desc(VitalReading.timestamp))
+            .limit(40)
+            .all()
+        )
+        latest_by_type: dict[str, VitalReading] = {}
+        for r in readings:
+            if r.type not in latest_by_type:
+                latest_by_type[r.type] = r
+
+        status, last_checked = _status_for_readings(readings)
+        latest_vitals = {
+            rtype: {
+                "type": r.type,
+                "value": r.value,
+                "quality": r.quality,
+                "timestamp": r.timestamp,
+            }
+            for rtype, r in latest_by_type.items()
+        }
+        latest = readings[0] if readings else None
+        result.append(
+            BedOut(
+                id=bed.id,
+                label=bed.label,
+                x=bed.x,
+                y=bed.y,
+                patient={
+                    "id": patient.id,
+                    "name": patient.name,
+                    "age": patient.age,
+                    "sex": patient.sex,
+                    "conditions": patient.conditions,
+                },
+                latest_vitals=latest_vitals,
+                latest_vital=(
+                    {
+                        "type": latest.type,
+                        "value": latest.value,
+                        "quality": latest.quality,
+                        "timestamp": latest.timestamp,
+                    }
+                    if latest
+                    else None
+                ),
+                status=status,
+                last_checked=last_checked,
+            )
+        )
     return result

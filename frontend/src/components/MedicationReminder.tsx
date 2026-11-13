@@ -1,125 +1,134 @@
 import { useState } from "react"
-import { useAppStore } from "../store/useStore"
-import { fetchMedicationEvents, acknowledgeMedicationEvent, markMedicationEventMissed } from "../lib/api"
-import { getLang, t } from "../lib/i18n"
+import { MedicationEvent } from "../store/useStore"
+import { acknowledgeMedicationEvent, markMedicationEventMissed } from "../lib/api"
+import { t } from "../lib/i18n"
+import { formatTime } from "../lib/format"
+import Card from "./Card"
+import SectionHead from "./SectionHead"
+import EmptyState from "./EmptyState"
 
-export default function MedicationReminder({ patientId }: { patientId: number }) {
-  const { medicationEvents, updateMedicationEvent, user } = useAppStore()
-  const [loading, setLoading] = useState(false)
+export interface PatientMedication {
+  id: number
+  drug: string
+  dose: string
+  schedule_times: string[]
+}
 
-  const patientEvents = medicationEvents.filter(
-    (e) => e.patient_id === patientId
-  )
+const STATUS: Record<string, { pill: string; labelKey: string }> = {
+  pending: { pill: "bg-watch-light text-watch-dark", labelKey: "status_pending" },
+  acknowledged: {
+    pill: "bg-normal-light text-normal-dark",
+    labelKey: "status_acknowledged",
+  },
+  missed: { pill: "bg-critical-light text-critical-dark", labelKey: "status_missed" },
+}
 
-  const handleAck = async (id: number) => {
-    setLoading(true)
+export default function MedicationReminder({
+  patientId,
+  medications = [],
+  events,
+  onChanged,
+}: {
+  patientId: number
+  medications?: PatientMedication[]
+  events: MedicationEvent[]
+  onChanged: () => void
+}) {
+  const [busy, setBusy] = useState(false)
+
+  const patientEvents = events.filter((event) => event.patient_id === patientId)
+  const nextEventFor = (medicationId: number) =>
+    patientEvents
+      .filter((event) => event.medication_id === medicationId)
+      .sort((a, b) => new Date(b.due_at ?? 0).getTime() - new Date(a.due_at ?? 0).getTime())[0]
+
+  const act = async (eventId: number, action: "ack" | "miss") => {
+    setBusy(true)
     try {
-      await acknowledgeMedicationEvent(id, user?.id ?? 0)
-      updateMedicationEvent({ id, status: "acknowledged" })
+      if (action === "ack") {
+        await acknowledgeMedicationEvent(eventId, 0)
+      } else {
+        await markMedicationEventMissed(eventId)
+      }
+      onChanged()
     } catch (err) {
-      console.error("Failed to acknowledge medication", err)
+      console.error("Medication action failed", err)
     } finally {
-      setLoading(false)
+      setBusy(false)
     }
-  }
-
-  const handleMiss = async (id: number) => {
-    setLoading(true)
-    try {
-      await markMedicationEventMissed(id)
-      updateMedicationEvent({ id, status: "missed" })
-    } catch (err) {
-      console.error("Failed to mark medication missed", err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (patientEvents.length === 0) {
-    return (
-      <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-        <h3 className="font-bold text-gray-800 text-base mb-4">{t("medication_schedule")}</h3>
-        <p className="text-sm text-gray-500">{t("no_medications")}</p>
-      </div>
-    )
-  }
-
-  const STATUS_CONFIG: Record<string, { color: string; bg: string }> = {
-    pending: { color: "text-amber-800", bg: "bg-amber-100" },
-    acknowledged: { color: "text-green-800", bg: "bg-green-100" },
-    missed: { color: "text-red-800", bg: "bg-red-100" },
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-      <h3 className="font-bold text-gray-800 text-base mb-4">{t("medication_schedule")}</h3>
-      <div className="space-y-3">
-        {patientEvents.map((e) => {
-          const cfg = STATUS_CONFIG[e.status] ?? STATUS_CONFIG.pending
-          const isPending = e.status === "pending"
-          const borderClass =
-            e.status === "pending"
-              ? "border-amber-200"
-              : e.status === "acknowledged"
-                ? "border-green-200"
-                : "border-red-200"
-          return (
-            <div
-              key={e.id}
-              className={`flex items-center justify-between p-3 rounded-xl border bg-white ${borderClass}`}
-            >
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs font-bold uppercase tracking-wider ${cfg.color}`}>
-                    {e.status === "pending"
-                      ? t("status_pending")
-                      : e.status === "acknowledged"
-                        ? t("status_acknowledged")
-                        : t("status_missed")}
-                  </span>
-                </div>
+    <Card hoverable={false}>
+      <SectionHead title={t("medication_schedule")} />
+      {medications.length === 0 && patientEvents.length === 0 ? (
+        <EmptyState icon="pill" title={t("no_medications_scheduled")} />
+      ) : (
+        <div className="space-y-3">
+          {medications.map((medication) => {
+            const event = nextEventFor(medication.id)
+            const status = event?.status ?? "scheduled"
+            const cfg = STATUS[status]
+            return (
+              <div
+                key={medication.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#E6EBF2] p-3"
+              >
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-gray-800">
-                    {e.drug} {e.dose}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-[#0F172A]">
+                      {medication.drug} {medication.dose}
+                    </span>
+                    {cfg && (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${cfg.pill}`}
+                      >
+                        {t(cfg.labelKey)}
+                      </span>
+                    )}
                   </div>
-                  <div className="text-[10px] text-gray-500 mt-0.5">
-                    {t("due_x", { time: new Date(e.due_at!).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) })}
+                  <div className="mt-1 text-xs text-[#94A3B8]">
+                    {medication.schedule_times.join(" · ")}
+                    {event?.due_at && ` • ${t("due_x", { time: formatTime(event.due_at) })}`}
                   </div>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                {isPending && (
-                  <>
+                {event?.status === "pending" ? (
+                  <div className="flex gap-2">
                     <button
-                      onClick={() => handleAck(e.id)}
-                      disabled={loading}
-                      className="min-h-[40px] px-3 py-2 rounded text-sm font-semibold bg-green-50 text-green-800 border border-green-200 hover:bg-green-100 disabled:opacity-60"
+                      type="button"
+                      disabled={busy}
+                      onClick={() => act(event.id, "ack")}
+                      className="min-h-[40px] rounded-xl border border-[#BBF7D0] bg-normal-light px-3 text-xs font-semibold text-normal-dark transition-colors hover:bg-[#D7F2E1] disabled:opacity-60"
                     >
                       {t("acknowledge_med")}
                     </button>
                     <button
-                      onClick={() => handleMiss(e.id)}
-                      disabled={loading}
-                      className="min-h-[40px] px-3 py-2 rounded text-sm font-semibold bg-red-50 text-red-800 border border-red-200 hover:bg-red-100 disabled:opacity-60"
+                      type="button"
+                      disabled={busy}
+                      onClick={() => act(event.id, "miss")}
+                      className="min-h-[40px] rounded-xl border border-[#FECACA] bg-critical-light px-3 text-xs font-semibold text-critical-dark transition-colors hover:bg-[#FBD5D5] disabled:opacity-60"
                     >
                       {t("mark_missed")}
                     </button>
-                  </>
-                )}
-                {!isPending && (
-                  <span className={`text-[10px] font-semibold ${cfg.color}`}>
-                    {e.status === "pending"
-                      ? t("status_pending")
-                      : e.status === "acknowledged"
-                        ? t("status_acknowledged")
-                        : t("status_missed")}
+                  </div>
+                ) : (
+                  <span className="text-xs font-semibold text-[#94A3B8]">
+                    {status === "acknowledged"
+                      ? t("status_acknowledged")
+                      : status === "missed"
+                        ? t("status_missed")
+                        : t("status_scheduled")}
                   </span>
                 )}
               </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+            )
+          })}
+
+          {patientEvents.length === 0 && (
+            <p className="text-xs text-[#94A3B8]">{t("no_medication_events")}</p>
+          )}
+        </div>
+      )}
+    </Card>
   )
 }

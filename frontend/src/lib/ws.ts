@@ -2,11 +2,6 @@ import { useAppStore } from "../store/useStore"
 
 let ws: WebSocket | null = null
 let reconnectTimer: number | null = null
-// Generation counter: only the most recently created socket may own the
-// reconnect timer. This prevents duplicate connections when connectWS is
-// called while an older reconnect timer is still pending (e.g. rapid
-// disconnect / reconnect / disconnect cycles).
-let generation = 0
 
 export function connectWS(url: string, token: string | null) {
   // Cancel any pending reconnect and close any existing socket so there is
@@ -20,7 +15,6 @@ export function connectWS(url: string, token: string | null) {
     ws = null
   }
 
-  const gen = ++generation
   const wsUrl = `${url}/ws${token ? `?token=${encodeURIComponent(token)}` : ""}`
   const socket = new WebSocket(wsUrl)
   ws = socket
@@ -72,14 +66,27 @@ export function connectWS(url: string, token: string | null) {
             )
           )
       } else if (msg.type === "estop_resumed" && msg.data) {
-        const { robots: resumedIds } = msg.data
-        useAppStore
-          .getState()
-          .setRobots(
-            useAppStore.getState().robots.map((r) =>
-              resumedIds.includes(r.id) ? { ...r, status: "idle" } : r
+        const { robots: resumedIds, robot_rows } = msg.data
+        if (Array.isArray(robot_rows) && robot_rows.length > 0) {
+          const byId = new Map(robot_rows.map((r: any) => [r.id, r]))
+          useAppStore
+            .getState()
+            .setRobots(
+              useAppStore
+                .getState()
+                .robots.map((r) => ({ ...r, ...(byId.get(r.id) as object) }))
             )
-          )
+        } else {
+          useAppStore
+            .getState()
+            .setRobots(
+              useAppStore
+                .getState()
+                .robots.map((r) =>
+                  resumedIds.includes(r.id) ? { ...r, status: "idle" } : r
+                )
+            )
+        }
       }
     } catch (err) {
       console.warn("Failed to parse WS message", err)

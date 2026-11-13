@@ -60,6 +60,7 @@ services:
 
   simulator:
     build: ./simulator
+    restart: unless-stopped
     depends_on:
       - backend
     environment:

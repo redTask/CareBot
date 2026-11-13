@@ -18,8 +18,13 @@ from app.services.task_orchestrator import (
     assign_nearest_robot,
     get_priority_rank,
 )
+from app.services.audit import log_action
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
+
+ACTIVE_STATUSES = ("queued", "running")
+FINISHED_STATUSES = ("done", "cancelled", "failed")
+HISTORY_LIMIT = 5
 
 
 @router.get("", response_model=list[TaskOut])
@@ -41,10 +46,40 @@ def list_tasks(
     if bed_id is not None:
         query = query.filter(Task.bed_id == bed_id)
 
-    tasks = query.all()
-    # Sort by priority order then created_at.
-    tasks.sort(key=lambda t: (get_priority_rank(t.priority), t.created_at or t.id))
-    return tasks
+    # The queue shows every active task plus only the 5 most recently
+    # completed/cancelled tasks, so old history does not bury live work.
+    all_tasks = query.all()
+    active = [t for t in all_tasks if t.status in ACTIVE_STATUSES]
+    active.sort(key=lambda t: (get_priority_rank(t.priority), t.created_at or t.id))
+    finished = [t for t in all_tasks if t.status in FINISHED_STATUSES]
+    finished.sort(key=lambda t: t.updated_at or t.created_at or 0, reverse=True)
+    return active + finished[:HISTORY_LIMIT]
+
+
+@router.delete("/old")
+def clear_old_tasks(
+    current_user: Annotated[User, Depends(require_role("admin"))],
+    db: Session = Depends(get_db),
+):
+    """Admin-only: permanently remove completed and cancelled task history."""
+    old_tasks = db.query(Task).filter(Task.status.in_(FINISHED_STATUSES)).all()
+    removed = len(old_tasks)
+    for task in old_tasks:
+        db.delete(task)
+    db.commit()
+
+    try:
+        log_action(
+            db,
+            action="tasks_cleared",
+            entity="task",
+            details={"removed": removed},
+            user=current_user,
+        )
+    except Exception:  # noqa: BLE001
+        pass
+
+    return {"removed": removed}
 
 
 @router.post("", response_model=TaskOut)

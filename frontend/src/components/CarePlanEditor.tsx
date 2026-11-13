@@ -2,6 +2,9 @@ import { useEffect, useState } from "react"
 import { useAppStore } from "../store/useStore"
 import { fetchCarePlan, updateCarePlan } from "../lib/api"
 import { t } from "../lib/i18n"
+import Card from "./Card"
+import SectionHead from "./SectionHead"
+import Btn from "./Btn"
 
 const DEFAULT_THRESHOLDS = {
   heart_rate: { min: 50, max: 120, critical_min: 40, critical_max: 140 },
@@ -10,7 +13,7 @@ const DEFAULT_THRESHOLDS = {
 }
 
 export default function CarePlanEditor({ patientId }: { patientId: number }) {
-  const { user, setPatient } = useAppStore()
+  const { user } = useAppStore()
   const [plan, setPlan] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -42,7 +45,6 @@ export default function CarePlanEditor({ patientId }: { patientId: number }) {
     try {
       const data = await updateCarePlan(patientId, { notes, thresholds })
       setPlan(data)
-      setPatient(data)
     } catch (err) {
       console.error("Failed to save care plan", err)
     } finally {
@@ -52,52 +54,52 @@ export default function CarePlanEditor({ patientId }: { patientId: number }) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-2xl shadow border border-gray-200 p-6 flex items-center justify-center h-48">
-        <span className="text-sm text-gray-500">{t("loading_patient")}</span>
-      </div>
+      <Card hoverable={false} className="flex h-48 items-center justify-center">
+        <span className="text-sm text-[#94A3B8]">{t("loading_patient")}</span>
+      </Card>
     )
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-800 text-base">{t("care_plan")}</h3>
-        {!canEdit && (
-          <span className="text-[10px] text-gray-500 uppercase tracking-wider">
-            {t("doctor_only_edit")}
-          </span>
-        )}
-      </div>
+    <Card hoverable={false}>
+      <SectionHead
+        title={t("care_plan")}
+        caption={!canEdit ? t("doctor_only_edit") : undefined}
+      />
 
       {plan ? (
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-2">{t("notes")}</label>
+            <label className="mb-2 block text-xs font-semibold text-[#475569]">{t("notes")}</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               disabled={!canEdit}
-              className={`w-full rounded-xl border p-3 text-sm ${!canEdit ? "bg-gray-50 text-gray-500" : "bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"}`}
+              className={`w-full rounded-xl border border-[#E6EBF2] p-3 text-sm outline-none transition-all duration-150 ${
+                !canEdit
+                  ? "bg-[#F1F4F9] text-[#94A3B8]"
+                  : "bg-white text-[#0F172A] focus:border-brand focus:ring-2 focus:ring-brand/20"
+              }`}
               rows={3}
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-2">
+            <label className="mb-2 block text-xs font-semibold text-[#475569]">
               {t("thresholds")}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               {Object.entries(thresholds).map(([key, val]: [string, any]) => (
                 <div
                   key={key}
-                  className="p-3 rounded-xl border bg-gray-50"
+                  className="rounded-xl border border-[#E6EBF2] bg-[#F1F4F9] p-3"
                 >
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                  <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">
                     {t(key as any) ?? key}
                   </div>
-                  <div className="text-gray-800 text-sm mb-1">
+                  <div className="mb-1 text-sm font-semibold text-[#0F172A]">
                     {val.min} – {val.max}
                   </div>
-                  <div className="text-[10px] text-gray-500">
+                  <div className="text-[10px] text-[#94A3B8]">
                     {t("critical_range", { min: val.critical_min, max: val.critical_max })}
                   </div>
                 </div>
@@ -105,18 +107,14 @@ export default function CarePlanEditor({ patientId }: { patientId: number }) {
             </div>
           </div>
           {canEdit && (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 disabled:opacity-60 transition-all"
-            >
+            <Btn onClick={handleSave} disabled={saving} className="w-full">
               {saving ? t("saving") : t("save_care_plan")}
-            </button>
+            </Btn>
           )}
         </div>
       ) : (
-        <p className="text-gray-500 text-sm">{t("no_care_plan")}</p>
+        <p className="text-sm text-[#94A3B8]">{t("no_care_plan")}</p>
       )}
-    </div>
+    </Card>
   )
 }

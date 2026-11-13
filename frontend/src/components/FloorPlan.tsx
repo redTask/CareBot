@@ -1,100 +1,104 @@
-import { Bed } from "../store/useStore"
-import BedCard from "./BedCard"
+import { useState } from "react"
+import { Bed, Robot } from "../store/useStore"
 import { t } from "../lib/i18n"
-import SectionHead from "./SectionHead"
 import Card from "./Card"
-import Illustration from "./Illustration"
+import Icon from "./Icon"
 
-export default function FloorPlan({ beds }: { beds: Bed[] }) {
-  if (beds.length === 0) {
-    return (
-      <Card>
-        <div className="flex flex-col items-center justify-center text-center py-10">
-          <Illustration className="w-72 mx-auto mb-6" />
-          <h3 className="text-lg font-semibold font-heading text-[#0F172A]">{t("no_beds")}</h3>
-        </div>
-      </Card>
-    )
-  }
+const STATUS_CELL: Record<string, string> = {
+  normal: "border-[#BBF7D0] bg-normal-light text-normal-dark",
+  watch: "border-[#FCD34D] bg-watch-light text-watch-dark",
+  critical: "border-[#FCA5A5] bg-critical-light text-critical-dark",
+}
 
-  const cols = 5
-  const cellW = 160
-  const cellH = 190
-  const svgW = cellW * cols
-  const svgH = cellH * 2
+const LEGEND = [
+  { key: "status_normal", dot: "bg-normal-dark" },
+  { key: "status_watch", dot: "bg-watch-dark" },
+  { key: "status_critical", dot: "bg-critical-dark" },
+]
+
+export default function FloorPlan({
+  beds,
+  robots = [],
+}: {
+  beds: Bed[]
+  robots?: Robot[]
+}) {
+  const [open, setOpen] = useState(false)
 
   return (
-    <Card>
-      <SectionHead title={t("ward_floor_plan")} caption={t("beds")} />
-      <div className="relative w-full overflow-hidden rounded-xl border border-[#E6EBF2] bg-[#F1F4F9] mb-6">
-        <svg
-          width="100%"
-          height="auto"
-          viewBox={`0 0 ${svgW} ${svgH}`}
-          style={{ maxHeight: 340 }}
-          role="img"
-          aria-label={t("ward_floor_plan")}
-          preserveAspectRatio="xMidYMid meet"
+    <Card padded={false} hoverable={false} className="overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-5">
+        <div>
+          <h3 className="text-lg font-semibold font-heading text-[#0F172A]">
+            {t("ward_floor_plan")}
+          </h3>
+          <p className="mt-0.5 text-xs text-[#94A3B8]">
+            {beds.length} beds • 2 rows × 5 cols
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          aria-expanded={open}
+          className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-[#E6EBF2] bg-white px-3 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F1F4F9]"
         >
-          {[...Array(cols)].map((_, c) => (
-            <rect
-              key={`col-${c}`}
-              x={c * cellW}
-              y={0}
-              width={cellW - 10}
-              height={cellH * 2 - 10}
-              fill="none"
-              stroke="#E6EBF2"
-              strokeWidth="1"
-            />
-          ))}
-          {beds.map((bed) => {
-            const col = Math.floor((bed.x ?? 0) / 4)
-            const row = Math.floor((bed.y ?? 0) / 4)
-            const cx = col * cellW + cellW / 2
-            const cy = row * cellH + cellH / 2
-            return (
-              <g
-                key={bed.id}
-                tabIndex={0}
-                role="button"
-                aria-label={t("bed_x", { id: bed.label })}
-                className="cursor-pointer"
-              >
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={26}
-                  fill="#F1F4F9"
-                  stroke="#CBD5E1"
-                  strokeWidth="2"
-                  className="focus:stroke-[#2F6BFF] focus:stroke-[3px] transition-colors duration-150"
-                />
-                <text
-                  x={cx}
-                  y={cy + 6}
-                  textAnchor="middle"
-                  fontSize="12"
-                  fontWeight="700"
-                  fill="#374151"
-                  pointerEvents="none"
-                  fontFamily="Inter, system-ui, sans-serif"
-                >
-                  {bed.label}
-                </text>
-              </g>
-            )
-          })}
-        </svg>
+          <Icon name={open ? "chevron-up" : "chevron-down"} size={16} />
+          {open ? t("floor_plan_hide") : t("floor_plan_show")}
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-        {beds.map((bed) => (
-          <BedCard key={bed.id} bed={bed} />
-        ))}
-      </div>
+      {open && (
+        <div className="border-t border-[#E6EBF2] bg-[#F8FAFC] p-4 sm:p-5">
+          {beds.length === 0 ? (
+            <p className="py-6 text-center text-sm text-[#94A3B8]">{t("no_beds")}</p>
+          ) : (
+            <div className="grid grid-cols-5 gap-2 sm:gap-3">
+              {beds.map((bed) => {
+                const robotsHere = robots.filter(
+                  (robot) =>
+                    Math.abs(robot.x - bed.x) < 2 && Math.abs(robot.y - bed.y) < 2
+                )
+                return (
+                  <div
+                    key={bed.id}
+                    className={[
+                      "relative flex min-h-[64px] flex-col items-center justify-center rounded-xl border px-1 py-2 text-center",
+                      STATUS_CELL[bed.status] ?? STATUS_CELL.normal,
+                    ].join(" ")}
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-wide sm:text-xs">
+                      {bed.label}
+                    </span>
+                    <span className="mt-0.5 max-w-full truncate text-[10px] text-[#475569]">
+                      {bed.patient ? bed.patient.name.split(" ")[0] : t("unoccupied")}
+                    </span>
+                    {robotsHere.length > 0 && (
+                      <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white shadow-sm">
+                        <Icon name="robot" size={16} className="w-3 h-3" />
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-[10px] font-medium text-[#64748B]">
+            {LEGEND.map((item) => (
+              <span key={item.key} className="inline-flex items-center gap-1.5">
+                <span className={`h-2 w-2 rounded-full ${item.dot}`} aria-hidden="true" />
+                {t(item.key)}
+              </span>
+            ))}
+            <span className="inline-flex items-center gap-1.5">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-white">
+                <Icon name="robot" size={16} className="w-2.5 h-2.5" />
+              </span>
+              {t("robots")}
+            </span>
+          </div>
+        </div>
+      )}
     </Card>
   )
 }
-
-

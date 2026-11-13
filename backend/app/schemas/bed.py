@@ -4,15 +4,17 @@ from datetime import datetime
 from typing import Any
 from pydantic import BaseModel
 
+from app.schemas.base import APIModel
 
-class VitalSummary(BaseModel):
+
+class VitalSummary(APIModel):
     type: str
     value: float
     quality: str
     timestamp: datetime
 
 
-class PatientBrief(BaseModel):
+class PatientBrief(APIModel):
     id: int
     name: str
     age: int
@@ -23,19 +25,22 @@ class PatientBrief(BaseModel):
         from_attributes = True
 
 
-class BedOut(BaseModel):
+class BedOut(APIModel):
     id: int
     label: str
     x: float
     y: float
     patient: PatientBrief | None = None
+    # Latest reading per vital type, so the UI can show all three tiles.
+    latest_vitals: dict[str, VitalSummary] = {}
+    # Kept for backward compatibility: the single most recent reading.
     latest_vital: VitalSummary | None = None
     status: str = "normal"  # normal | watch | critical
-    last_checked: str | None = None
+    last_checked: datetime | None = None
 
     class Config:
         from_attributes = True
 
 
-class BedList(BaseModel):
+class BedList(APIModel):
     beds: list[BedOut]

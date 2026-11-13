@@ -1,5 +1,3 @@
-import React from "react"
-
 // Illness / get-well illustration. The one SVG allowed to exceed 32 px.
 export default function Illustration({ className = "" }: { className?: string }) {
   return (
@@ -11,7 +9,7 @@ export default function Illustration({ className = "" }: { className?: string })
       aria-label="Patient recovering in bed"
       role="img"
     >
-      <!-- ECG / pulse line -->
+      {/* ECG / pulse line */}
       <polyline
         points="250,135 280,135 295,105 310,160 325,135 355,135 385,135"
         stroke="#2F6BFF"
@@ -26,13 +24,13 @@ export default function Illustration({ className = "" }: { className?: string })
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <!-- Bed -->
+      {/* Bed */}
       <rect x="56" y="148" width="260" height="72" rx="14" fill="#FFFFFF" stroke="#E6EBF2" strokeWidth="2" />
       <rect x="42" y="196" width="24" height="16" rx="4" fill="#FFFFFF" stroke="#E6EBF2" strokeWidth="2" />
       <rect x="290" y="196" width="24" height="16" rx="4" fill="#FFFFFF" stroke="#E6EBF2" strokeWidth="2" />
-      <!-- Pillow -->
+      {/* Pillow */}
       <rect x="70" y="130" width="80" height="26" rx="10" fill="#EAF0FF" stroke="#2F6BFF" strokeWidth="2" />
-      <!-- Patient head -->
+      {/* Patient head */}
       <circle cx="112" cy="126" r="16" fill="#F5F7FA" stroke="#E6EBF2" strokeWidth="2" />
       <path
         d="M100 132 Q112 122 124 132"
@@ -41,7 +39,7 @@ export default function Illustration({ className = "" }: { className?: string })
         strokeLinecap="round"
         fill="none"
       />
-      <!-- Blanket -->
+      {/* Blanket */}
       <rect x="88" y="156" width="156" height="56" rx="12" fill="#FFFFFF" stroke="#E6EBF2" strokeWidth="2" />
       <path
         d="M88 184 Q166 156 244 184"
@@ -50,7 +48,7 @@ export default function Illustration({ className = "" }: { className?: string })
         strokeLinecap="round"
         fill="none"
       />
-      <!-- Thermometer -->
+      {/* Thermometer */}
       <rect x="232" y="166" width="10" height="30" rx="5" fill="#FFFFFF" stroke="#E6EBF2" strokeWidth="2" />
       <rect x="234" y="180" width="6" height="14" rx="3" fill="#DC2626" />
     </svg>

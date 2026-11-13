@@ -7,6 +7,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.timeutils import iso_z
 from app.models.alert import Alert
 from app.models.care_plan import CarePlan
 from app.models.patient import Patient
@@ -123,9 +124,7 @@ def _create_alert(
                         "message": alert.message,
                         "status": alert.status,
                         "escalation_level": alert.escalation_level,
-                        "created_at": alert.created_at.isoformat()
-                        if alert.created_at
-                        else None,
+                        "created_at": iso_z(alert.created_at),
                     },
                 }
             )
@@ -178,9 +177,7 @@ def _update_alert_severity(db: Session, alert: Alert, severity: str) -> None:
                         "message": alert.message,
                         "status": alert.status,
                         "escalation_level": alert.escalation_level,
-                        "created_at": alert.created_at.isoformat()
-                        if alert.created_at
-                        else None,
+                        "created_at": iso_z(alert.created_at),
                     },
                 }
             )
@@ -337,9 +334,7 @@ def _create_vitals_check_task(
                         "bed_id": task.bed_id,
                         "robot_id": task.robot_id,
                         "status": task.status,
-                        "created_at": task.created_at.isoformat()
-                        if task.created_at
-                        else None,
+                        "created_at": iso_z(task.created_at),
                     },
                 }
             )

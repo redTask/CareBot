@@ -1,17 +1,20 @@
 import { useState } from "react"
 import { useAppStore } from "../store/useStore"
-import { getLang, t } from "../lib/i18n"
+import { API_BASE } from "../lib/api"
+import { t } from "../lib/i18n"
 import Card from "./Card"
 import Btn from "./Btn"
 import Icon from "./Icon"
 
 export default function PatientCallButton() {
-  const { token } = useAppStore()
+  const token = useAppStore((state) => state.token)
   const [sent, setSent] = useState(false)
+  const [busy, setBusy] = useState(false)
 
   const handleCall = async () => {
+    setBusy(true)
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/alerts/patient_call`, {
+      const res = await fetch(`${API_BASE}/alerts/patient_call`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -23,22 +26,28 @@ export default function PatientCallButton() {
       setSent(true)
     } catch (err) {
       console.error("Patient call error", err)
+    } finally {
+      setBusy(false)
     }
   }
 
   return (
     <Card>
-      <div className="flex flex-col gap-4">
-        <Btn onClick={handleCall} disabled={sent} className="w-full">
-          <Icon name="phone" size={20} className="mr-2" />
-          {sent ? t("call_sent") : t("simulate_patient_call")}
-        </Btn>
-        {sent && (
-          <span className="text-xs font-semibold text-normal-dark">
-            {t("high_priority_alert")}
-          </span>
-        )}
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-tint text-brand">
+          <Icon name="phone" size={20} />
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold text-[#0F172A]">
+            {t("simulate_patient_call")}
+          </h3>
+          <p className="mt-0.5 text-xs text-[#94A3B8]">{t("high_priority_alert")}</p>
+        </div>
       </div>
+      <Btn onClick={handleCall} disabled={sent || busy} className="mt-4 w-full">
+        <Icon name="phone" size={16} className="mr-2" />
+        {sent ? t("call_sent") : t("simulate_patient_call")}
+      </Btn>
     </Card>
   )
 }

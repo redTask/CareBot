@@ -3,30 +3,62 @@ care plans, medications)."""
 
 from __future__ import annotations
 
-from datetime import datetime, time, timedelta, timezone
-
 from app.core.security import get_password_hash
 from app.db.session import SessionLocal
-from app.models.alert import Alert
-from app.models.audit_log import AuditLog
 from app.models.bed import Bed
 from app.models.care_plan import CarePlan
 from app.models.escalation_policy import EscalationPolicy
 from app.models.medication import Medication
-from app.models.medication_event import MedicationEvent
 from app.models.patient import Patient
 from app.models.robot import Robot
-from app.models.task import Task
 from app.models.user import User
-from app.models.vital_reading import VitalReading
 from app.models.ward import Ward
+
+# A small, realistic formulary. Every patient gets three scheduled medicines so
+# the medication schedule is never empty in the demo.
+MEDICATIONS = [
+    ("Paracetamol", "500mg", ["08:00", "20:00"]),
+    ("Amlodipine", "5mg", ["09:00"]),
+    ("Metformin", "500mg", ["13:00", "21:00"]),
+]
+
+
+def _ensure_medications(db) -> int:
+    """Create the demo medications for any patient missing them."""
+    created = 0
+    patients = db.query(Patient).all()
+    for patient in patients:
+        existing = {
+            m.drug
+            for m in db.query(Medication)
+            .filter(Medication.patient_id == patient.id)
+            .all()
+        }
+        for drug, dose, times in MEDICATIONS:
+            if drug in existing:
+                continue
+            db.add(
+                Medication(
+                    patient_id=patient.id,
+                    drug=drug,
+                    dose=dose,
+                    schedule_times=times,
+                )
+            )
+            created += 1
+    return created
 
 
 def seed() -> None:
     db = SessionLocal()
     try:
         if db.query(User).first():
-            print("Seed data already present. Skipping.")
+            added = _ensure_medications(db)
+            db.commit()
+            if added:
+                print(f"Seed: added {added} missing medication rows.")
+            else:
+                print("Seed data already present. Skipping.")
             return
 
         # Users (one per role)
@@ -119,22 +151,11 @@ def seed() -> None:
             )
             db.add(cp)
 
-        # Medications: one scheduled in ~2 minutes so the demo can trigger it.
-        now = datetime.now(timezone.utc)
-        soon = (now + timedelta(minutes=2)).time().replace(second=0, microsecond=0)
-        med = Medication(
-            patient_id=patients[0].id,  # Ramesh Kumar
-            drug="Paracetamol",
-            dose="500mg",
-            schedule_times=[soon.isoformat()],
-        )
-        db.add(med)
-        db.flush()
-
+        added = _ensure_medications(db)
         db.commit()
         print(
             "Seed complete: 3 users, 1 ward, 10 beds, 10 patients, 3 robots, "
-            "1 escalation policy, 10 care plans, 1 medication."
+            f"1 escalation policy, 10 care plans, {added} medications."
         )
     finally:
         db.close()

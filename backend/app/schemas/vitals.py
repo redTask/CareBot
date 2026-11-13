@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.schemas.base import APIModel
+
 
 class VitalReadingCreate(BaseModel):
     patient_id: int
@@ -13,7 +15,7 @@ class VitalReadingCreate(BaseModel):
     timestamp: datetime | None = None
 
 
-class VitalReadingOut(BaseModel):
+class VitalReadingOut(APIModel):
     id: int
     patient_id: int
     robot_id: int | None

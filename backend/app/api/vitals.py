@@ -1,16 +1,19 @@
 from __future__ import annotations
 
-from datetime import datetime
+import asyncio
+from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_user
+from app.core.timeutils import iso_z, utcnow
 from app.models.patient import Patient
 from app.models.vital_reading import VitalReading
 from app.schemas.vitals import VitalReadingCreate, VitalReadingOut
 from app.services.alert_engine import process_vital
+from app.ws.manager import manager
 
 router = APIRouter(prefix="/vitals", tags=["vitals"])
 
@@ -31,7 +34,7 @@ def create_vital(
         type=reading.type,
         value=reading.value,
         quality=reading.quality,
-        timestamp=reading.timestamp or datetime.utcnow(),
+        timestamp=reading.timestamp or utcnow(),
     )
     db.add(db_reading)
     db.commit()
@@ -41,11 +44,9 @@ def create_vital(
     process_vital(db, db_reading)
 
     # Broadcast live vital update.
-    import asyncio
-
     try:
         asyncio.get_event_loop().create_task(
-            __import__("app.ws.manager", fromlist=["manager"]).manager.broadcast(
+            manager.broadcast(
                 {
                     "type": "vital",
                     "data": {
@@ -55,7 +56,7 @@ def create_vital(
                         "type": db_reading.type,
                         "value": db_reading.value,
                         "quality": db_reading.quality,
-                        "timestamp": db_reading.timestamp.isoformat(),
+                        "timestamp": iso_z(db_reading.timestamp),
                     },
                 }
             )
@@ -70,9 +71,13 @@ def create_vital(
 def list_vitals(
     patient_id: int | None = Query(None),
     limit: int = Query(100, le=1000),
+    range: str | None = Query(None, pattern="^(1h|24h)$"),
     db: Session = Depends(get_db),
 ):
     query = db.query(VitalReading).order_by(VitalReading.timestamp.desc())
     if patient_id is not None:
         query = query.filter(VitalReading.patient_id == patient_id)
+    if range is not None:
+        window = timedelta(hours=1) if range == "1h" else timedelta(hours=24)
+        query = query.filter(VitalReading.timestamp >= utcnow() - window)
     return query.limit(limit).all()

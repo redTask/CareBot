@@ -7,6 +7,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from app.core.timeutils import iso_z
 from app.models.bed import Bed
 from app.models.patient import Patient
 from app.models.robot import Robot
@@ -264,9 +265,7 @@ def _broadcast_robot_updated(robot: Robot) -> None:
                         "x": robot.x,
                         "y": robot.y,
                         "current_task_id": robot.current_task_id,
-                        "last_seen": robot.last_seen.isoformat()
-                        if robot.last_seen
-                        else None,
+                        "last_seen": iso_z(robot.last_seen),
                     },
                 }
             )
@@ -284,6 +283,6 @@ def _task_dict(task: Task) -> dict[str, Any]:
         "robot_id": task.robot_id,
         "status": task.status,
         "created_by": task.created_by,
-        "created_at": task.created_at.isoformat() if task.created_at else None,
-        "updated_at": task.updated_at.isoformat() if task.updated_at else None,
+        "created_at": iso_z(task.created_at),
+        "updated_at": iso_z(task.updated_at),
     }

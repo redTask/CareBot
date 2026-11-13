@@ -4,8 +4,10 @@ from datetime import datetime
 from typing import Any
 from pydantic import BaseModel
 
+from app.schemas.base import APIModel
 
-class AuditLogOut(BaseModel):
+
+class AuditLogOut(APIModel):
     id: int
     user_id: int | None
     action: str

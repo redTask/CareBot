@@ -1,5 +1,3 @@
-import React from "react"
-
 // Section heading: text-lg font-semibold. Follow with gap-8 to the next section.
 export default function SectionHead({
   title,

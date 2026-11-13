@@ -1,24 +1,26 @@
 import { useAppStore } from "../store/useStore"
+import { t } from "../lib/i18n"
+import { formatTime } from "../lib/format"
 
 export default function OfflineBanner() {
-  const { online, lastUpdated } = useAppStore((state) => ({
-    online: state.online,
-    lastUpdated: state.lastUpdated,
-  }))
+  const online = useAppStore((state) => state.online)
+  const lastUpdated = useAppStore((state) => state.lastUpdated)
 
   if (online) return null
 
   return (
     <div
-      className="fixed inset-x-0 top-0 z-[60] bg-amber-900 text-amber-100 px-4 py-2.5 text-center text-sm font-medium"
+      className="border-b border-[#FCD34D] bg-watch-light px-4 py-2 text-watch-dark"
       role="alert"
       aria-live="polite"
     >
-      <span className="flex items-center justify-center gap-2">
-        <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" aria-hidden="true" />
-        <span>Offline — last updated {lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : "—"}</span>
-        <span className="text-[#FCD34D] animate-pulse">Reconnecting…</span>
-      </span>
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2 text-xs font-semibold sm:px-6 lg:px-8">
+        <span className="h-2 w-2 animate-pulse rounded-full bg-critical-dark" aria-hidden="true" />
+        <span>
+          {t("offline")} — {t("last_update")} {formatTime(lastUpdated)}
+        </span>
+        <span className="opacity-75">Reconnecting…</span>
+      </div>
     </div>
   )
 }

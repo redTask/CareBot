@@ -61,7 +61,7 @@ describe("WS reconnect", () => {
     vi.advanceTimersByTime(200) // past the old timer's 3s mark
 
     expect(FakeWS.instances.length).toBe(2) // only the replacement socket
-    const current = getWS()
+    const current = getWS() as unknown as FakeWS
     expect(current).toBe(FakeWS.instances[1])
     expect(FakeWS.instances[0].closed).toBe(true)
 

@@ -1,87 +1,102 @@
 import { useEffect, useState } from "react"
-import { useAppStore } from "../store/useStore"
 import { fetchAuditLogs } from "../lib/api"
 import { t } from "../lib/i18n"
+import { formatDateTime } from "../lib/format"
+import Page from "./Page"
+import Card from "./Card"
+import AppHeader from "./AppHeader"
+import EmptyState from "./EmptyState"
+import Icon from "./Icon"
 
 export default function AuditLogView() {
   const [logs, setLogs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   useEffect(() => {
     fetchAuditLogs()
       .then((data) => setLogs(data))
-      .catch((err) => console.error("Failed to fetch audit logs", err))
+      .catch((err) => {
+        console.error("Failed to fetch audit logs", err)
+        setError(err.message || t("error"))
+      })
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-        <span className="text-sm text-gray-500">{t("loading_patient")}</span>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">{t("audit_log")}</h1>
-        <p className="text-gray-600 text-sm mt-1">
-          {t("audit_subtitle")}
-        </p>
-      </div>
+    <Page>
+      <AppHeader active="audit" />
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-5 flex items-start gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-tint text-brand">
+            <Icon name="file-text" size={24} />
+          </span>
+          <div>
+            <h1 className="font-heading text-2xl font-bold text-[#0F172A]">
+              {t("audit_log")}
+            </h1>
+            <p className="mt-1 text-sm text-[#475569]">{t("audit_subtitle")}</p>
+          </div>
+        </div>
 
-      <div className="bg-white rounded-2xl shadow border border-gray-200 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                {t("time")}
-              </th>
-              <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                {t("user")}
-              </th>
-              <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                {t("action")}
-              </th>
-              <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                {t("entity")}
-              </th>
-              <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-                {t("details")}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {logs.map((log) => (
-              <tr key={log.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 text-sm text-gray-600 font-mono">
-                  {new Date(log.timestamp!).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-800">
-                  {log.user_id != null ? t("user_x", { id: log.user_id }) : t("system")}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-800 font-medium">
-                  {log.action}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">
-                  {log.entity}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-500">
-                  {JSON.stringify(log.details || {})}
-                </td>
-              </tr>
+        {error && (
+          <Card hoverable={false} className="mb-4 border-critical-light bg-critical-light/40">
+            <p className="text-sm text-critical-dark">{error}</p>
+          </Card>
+        )}
+
+        {loading ? (
+          <div className="animate-pulse space-y-2">
+            {Array.from({ length: 6 }, (_, index) => (
+              <div key={index} className="h-12 rounded-xl bg-white" />
             ))}
-            {logs.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-500 text-sm">
-                  {t("no_audit_entries")}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </div>
+        ) : logs.length === 0 ? (
+          <Card hoverable={false}>
+            <EmptyState icon="file-text" title={t("no_audit_entries")} />
+          </Card>
+        ) : (
+          <Card padded={false} hoverable={false} className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left">
+                <thead className="bg-[#F1F4F9]">
+                  <tr>
+                    {[t("time"), t("user"), t("action"), t("entity"), t("details")].map(
+                      (heading) => (
+                        <th
+                          key={heading}
+                          className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]"
+                        >
+                          {heading}
+                        </th>
+                      )
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E6EBF2]">
+                  {logs.map((log) => (
+                    <tr key={log.id} className="transition-colors hover:bg-[#F8FAFC]">
+                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[#475569]">
+                        {formatDateTime(log.timestamp)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-[#0F172A]">
+                        {log.user_id != null ? t("user_x", { id: log.user_id }) : t("system")}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-semibold text-[#0F172A]">
+                        {log.action}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-[#475569]">{log.entity}</td>
+                      <td className="max-w-xs truncate px-4 py-3 font-mono text-xs text-[#94A3B8]">
+                        {JSON.stringify(log.details || {})}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
+      </main>
+    </Page>
   )
 }

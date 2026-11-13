@@ -4,8 +4,10 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Any
 
+from app.schemas.base import APIModel
 
-class AlertOut(BaseModel):
+
+class AlertOut(APIModel):
     id: int
     type: str
     severity: str
