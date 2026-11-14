@@ -10,3 +10,6 @@ frontend/dist/
 frontend/.vite/
 *.log
 .docker/
+
+# Local browser verification artifacts (Chrome profile, screenshots)
+.verify/
