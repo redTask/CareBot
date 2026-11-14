@@ -38,10 +38,10 @@ export default function PatientCallButton() {
           <Icon name="phone" size={20} />
         </span>
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-[#0F172A]">
+          <h3 className="text-sm font-semibold text-navy">
             {t("simulate_patient_call")}
           </h3>
-          <p className="mt-0.5 text-xs text-[#94A3B8]">{t("high_priority_alert")}</p>
+          <p className="mt-0.5 text-xs text-navy/60">{t("high_priority_alert")}</p>
         </div>
       </div>
       <Btn onClick={handleCall} disabled={sent || busy} className="mt-4 w-full">

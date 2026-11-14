@@ -9,28 +9,30 @@ import PatientAvatar from "./PatientAvatar"
 
 type Status = "normal" | "watch" | "critical"
 
+// Filled status pills: icon + colour + label, never colour alone.
 const STATUS_CONFIG: Record<Status, { icon: string; textKey: string; badge: string }> = {
   normal: {
     icon: "circle-check",
     textKey: "status_normal",
-    badge: "bg-normal-light text-normal-dark",
+    badge: "bg-lime text-navy",
   },
   watch: {
     icon: "alert-circle",
     textKey: "status_watch",
-    badge: "bg-watch-light text-watch-dark",
+    badge: "bg-teal text-white text-base font-bold",
   },
   critical: {
     icon: "alert-triangle",
     textKey: "status_critical",
-    badge: "bg-critical-light text-critical-dark",
+    badge: "bg-navy text-white text-base font-bold border-2 border-white animate-ring",
   },
 }
 
+// Card tint stays a palette tint — navy-tinted for critical, teal for watch.
 const CARD_TINT: Record<Status, string> = {
   normal: "",
-  watch: "border-[#FCD34D] bg-watch-light/30",
-  critical: "border-[#FCA5A5] bg-critical-light/40",
+  watch: "border-teal/40 bg-watch-light/60",
+  critical: "border-navy/40 bg-navy/[0.04]",
 }
 
 const DEFAULTS = {
@@ -64,10 +66,12 @@ function rangeState(type: string, value: number): "ok" | "watch" | "critical" {
   return "ok"
 }
 
+// Critical vitals out of range are the one place red is allowed besides the
+// critical banner and E-STOP.
 const VALUE_TONE: Record<string, string> = {
-  ok: "text-[#0F172A]",
-  watch: "text-watch-dark",
-  critical: "text-critical-dark",
+  ok: "text-navy",
+  watch: "text-teal",
+  critical: "text-alert",
 }
 
 export default function BedCard({ bed, index = 0 }: { bed: Bed; index?: number }) {
@@ -90,7 +94,7 @@ export default function BedCard({ bed, index = 0 }: { bed: Bed; index?: number }
 
   return (
     <article
-      className="h-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+      className="h-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2"
       role="button"
       tabIndex={0}
       onClick={handleOpen}
@@ -120,17 +124,20 @@ export default function BedCard({ bed, index = 0 }: { bed: Bed; index?: number }
           {patient ? (
             <PatientAvatar name={patient.name} size={56} />
           ) : (
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F1F4F9] text-[#94A3B8]">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-mint/20 text-navy/60">
               <Icon name="bed" size={24} />
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="break-words text-base font-semibold leading-tight text-[#0F172A]">
+            {/* The name is the most prominent thing on the card: text-lg,
+                bold, navy, no opacity, free to wrap to two lines. */}
+            {/* Never truncates: the name wraps and the card grows if needed. */}
+            <h3 className="break-words text-lg font-bold leading-snug text-navy">
               {patient ? patient.name : t("unoccupied")}
             </h3>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-[#475569]">
+            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-sm font-medium text-navy/70">
               {patient && <span>{t("age_sex", { age: patient.age, sex: patient.sex })}</span>}
-              <span className="rounded-full bg-[#F1F4F9] px-2 py-0.5 font-medium text-[#64748B]">
+              <span className="rounded-full bg-teal/10 px-2 py-0.5 font-medium text-navy/70">
                 {bed.label}
               </span>
             </div>
@@ -145,7 +152,7 @@ export default function BedCard({ bed, index = 0 }: { bed: Bed; index?: number }
             {conditions.slice(0, 2).map((condition) => (
               <span
                 key={condition}
-                className="rounded-full bg-brand-tint px-2 py-0.5 text-[10px] font-semibold text-[#1F55D6]"
+                className="rounded-full bg-brand-tint px-2 py-0.5 text-sm font-medium text-navy/70"
               >
                 {condition}
               </span>
@@ -153,9 +160,9 @@ export default function BedCard({ bed, index = 0 }: { bed: Bed; index?: number }
           </div>
           {patient && (
             <span
-              className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${cfg.badge}`}
+              className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${cfg.badge}`}
             >
-              <Icon name={cfg.icon} size={16} />
+              <Icon name={cfg.icon as any} size={16} />
               {t(cfg.textKey)}
             </span>
           )}
@@ -170,10 +177,10 @@ export default function BedCard({ bed, index = 0 }: { bed: Bed; index?: number }
                 return (
                   <div
                     key={vital.type}
-                    className="rounded-xl border border-[#E6EBF2] bg-[#F8FAFC] px-2 py-2"
+                    className="rounded-xl border border-line bg-mint/[0.08] px-2 py-2"
                   >
                     <div
-                      className="flex items-center gap-1 text-[10px] font-medium text-[#94A3B8]"
+                      className="flex items-center gap-1 text-[10px] font-semibold text-navy/60"
                       title={t(vital.labelKey)}
                     >
                       <Icon name={vital.icon as any} size={16} />
@@ -185,25 +192,27 @@ export default function BedCard({ bed, index = 0 }: { bed: Bed; index?: number }
                       >
                         {reading ? reading.value.toFixed(vital.type === "temperature" ? 1 : 0) : "—"}
                       </span>
-                      <span className="text-[10px] text-[#94A3B8]">{vital.unit}</span>
+                      <span className="text-[10px] text-navy/60">{vital.unit}</span>
                     </div>
                   </div>
                 )
               })}
             </div>
           ) : (
-            <div className="mt-5 rounded-xl border border-dashed border-[#E6EBF2] py-5 text-center text-xs text-[#94A3B8]">
+            <div className="mt-5 rounded-xl border border-dashed border-teal/25 py-5 text-center text-xs text-navy/60">
               {t("no_vitals_yet")}
             </div>
           )}
 
-          <div className="mt-4 flex items-center justify-between border-t border-[#F1F4F9] pt-3 text-xs text-[#94A3B8]">
+          <div className="mt-4 flex items-center justify-between border-t border-line pt-3 text-xs text-navy/60">
             <span>
               {bed.last_checked
                 ? t("last_checked_at", { time: formatTime(bed.last_checked) })
                 : "—"}
             </span>
-            {patient && <span className="font-semibold text-brand">{t("view_details")} →</span>}
+            {patient && (
+              <span className="font-bold text-teal">{t("view_details")} →</span>
+            )}
           </div>
         </div>
       </Card>

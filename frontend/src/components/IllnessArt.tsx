@@ -61,14 +61,14 @@ export function IllnessArt({
     >
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#93B4FF" />
-          <stop offset="100%" stopColor="#2F6BFF" />
+          <stop offset="0%" stopColor="#51E4BA" />
+          <stop offset="100%" stopColor="#149DA5" />
         </linearGradient>
       </defs>
 
       {kind === "heart" && (
         <g>
-          <ellipse cx="120" cy="104" rx="88" ry="76" fill="#EAF0FF" opacity="0.6" />
+          <ellipse cx="120" cy="104" rx="88" ry="76" fill="#CFF6EA" opacity="0.6" />
           <g className="illness-heartbeat" style={{ transformOrigin: "120px 100px" }}>
             <path
               d="M120 162s-62-36-62-80a34 34 0 0 1 62-19 34 34 0 0 1 62 19c0 44-62 80-62 80Z"
@@ -78,7 +78,7 @@ export function IllnessArt({
             <path
               d="M96 96h14l8-18 10 34 8-16h12"
               fill="none"
-              stroke="#fff"
+              stroke="#254262"
               strokeWidth="4"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -87,7 +87,7 @@ export function IllnessArt({
           <polyline
             points="58,60 82,60 90,48 98,72 106,60 182,60"
             fill="none"
-            stroke="#93B4FF"
+            stroke="#51E4BA"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -98,8 +98,8 @@ export function IllnessArt({
 
       {kind === "lungs" && (
         <g>
-          <ellipse cx="120" cy="104" rx="86" ry="74" fill="#EAF0FF" opacity="0.6" />
-          <path d="M120 62v66" stroke="#1F55D6" strokeWidth="6" strokeLinecap="round" />
+          <ellipse cx="120" cy="104" rx="86" ry="74" fill="#CFF6EA" opacity="0.6" />
+          <path d="M120 62v66" stroke="#254262" strokeWidth="6" strokeLinecap="round" />
           <g className="illness-breathe" style={{ transformOrigin: "120px 96px" }}>
             <path
               d="M112 74c-10 6-16 18-26 24-12 7-18 20-14 34 4 15 20 22 32 15 9-5 12-16 12-27V80c0-7-1-8-4-6Z"
@@ -112,13 +112,13 @@ export function IllnessArt({
               opacity="0.85"
             />
           </g>
-          <path d="M120 62v-10" stroke="#1F55D6" strokeWidth="6" strokeLinecap="round" />
+          <path d="M120 62v-10" stroke="#254262" strokeWidth="6" strokeLinecap="round" />
         </g>
       )}
 
       {kind === "diabetes" && (
         <g>
-          <ellipse cx="120" cy="104" rx="84" ry="74" fill="#EAF0FF" opacity="0.6" />
+          <ellipse cx="120" cy="104" rx="84" ry="74" fill="#CFF6EA" opacity="0.6" />
           <g className="illness-drip" style={{ transformOrigin: "120px 110px" }}>
             <path
               d="M120 52c0 0 34 40 34 62a34 34 0 1 1-68 0c0-22 34-62 34-62Z"
@@ -127,22 +127,22 @@ export function IllnessArt({
             />
             <path
               d="M132 122a14 14 0 0 1-12 14"
-              stroke="#fff"
+              stroke="#254262"
               strokeWidth="5"
               strokeLinecap="round"
               fill="none"
             />
           </g>
-          <g stroke="#93B4FF" strokeWidth="4" strokeLinecap="round" fill="none">
+          <g stroke="#51E4BA" strokeWidth="4" strokeLinecap="round" fill="none">
             <path d="M52 150a70 70 0 0 1 136 0" />
-            <path d="M120 150l16-22" stroke="#2F6BFF" className="illness-gauge" />
+            <path d="M120 150l16-22" stroke="#149DA5" className="illness-gauge" />
           </g>
         </g>
       )}
 
       {kind === "brain" && (
         <g>
-          <ellipse cx="120" cy="104" rx="86" ry="74" fill="#EAF0FF" opacity="0.6" />
+          <ellipse cx="120" cy="104" rx="86" ry="74" fill="#CFF6EA" opacity="0.6" />
           <g className="illness-glow" style={{ transformOrigin: "120px 100px" }}>
             <path
               d="M92 66c-14 4-22 18-18 30-10 8-10 24 2 30-2 12 8 22 20 20 6 10 20 12 28 4 10 8 24 4 28-6 12-2 18-14 12-24 4-12-4-24-16-24-2-14-16-22-28-16-6-8-20-10-28-4Z"
@@ -150,7 +150,7 @@ export function IllnessArt({
               opacity="0.85"
             />
           </g>
-          <g stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.85">
+          <g stroke="#254262" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.85">
             <path d="M120 72v62" />
             <path d="M96 92c8 0 12 6 12 14s6 14 12 14" />
             <path d="M144 92c-8 0-12 6-12 14s-6 14-12 14" />
@@ -160,7 +160,7 @@ export function IllnessArt({
 
       {kind === "kidney" && (
         <g>
-          <ellipse cx="120" cy="104" rx="84" ry="74" fill="#EAF0FF" opacity="0.6" />
+          <ellipse cx="120" cy="104" rx="84" ry="74" fill="#CFF6EA" opacity="0.6" />
           <g className="illness-breathe" style={{ transformOrigin: "120px 104px" }}>
             <path
               d="M86 60c-20 6-30 30-24 54 6 24 24 38 40 30 14-8 12-28 6-44-5-14-8-34-22-40Z"
@@ -173,13 +173,13 @@ export function IllnessArt({
               opacity="0.85"
             />
           </g>
-          <path d="M120 84v44" stroke="#1F55D6" strokeWidth="6" strokeLinecap="round" />
+          <path d="M120 84v44" stroke="#254262" strokeWidth="6" strokeLinecap="round" />
         </g>
       )}
 
       {kind === "default" && (
         <g>
-          <ellipse cx="120" cy="104" rx="84" ry="74" fill="#EAF0FF" opacity="0.6" />
+          <ellipse cx="120" cy="104" rx="84" ry="74" fill="#CFF6EA" opacity="0.6" />
           <g className="illness-breathe" style={{ transformOrigin: "120px 100px" }}>
             <rect x="104" y="52" width="32" height="96" rx="12" fill={`url(#${gradId})`} opacity="0.9" />
             <rect x="72" y="84" width="96" height="32" rx="12" fill={`url(#${gradId})`} opacity="0.9" />

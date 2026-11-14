@@ -1,11 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
 import ImpactPage from "../ImpactPage"
-import { useAppStore } from "../store/useStore"
 
 // Mock the fetch API
-global.fetch = vi.fn()
+globalThis.fetch = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()

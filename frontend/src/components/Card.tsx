@@ -1,7 +1,7 @@
 import React from "react"
 
-// Base card used everywhere. White, rounded-2xl, border #E6EBF2, shadow-sm,
-// hover lift to shadow-md over 150ms. Nothing touches its neighbours.
+// Base card used everywhere. White surface, 1px teal border at 25% opacity,
+// soft navy-tinted shadow, hover lift. Nothing touches its neighbours.
 export interface CardProps extends React.HTMLAttributes<HTMLElement> {
   padded?: boolean
   hoverable?: boolean
@@ -17,8 +17,8 @@ export default function Card({
   return (
     <div
       className={[
-        "bg-white rounded-2xl border border-[#E6EBF2] shadow-sm transition-all duration-150",
-        hoverable ? "hover:shadow-md hover:-translate-y-1" : "",
+        "bg-white rounded-2xl border border-line shadow-card transition-all duration-150",
+        hoverable ? "hover:shadow-card-hover hover:border-teal/40" : "",
         padded ? "p-5" : "",
         className,
       ]

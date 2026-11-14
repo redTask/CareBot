@@ -10,12 +10,12 @@ export default function OfflineBanner() {
 
   return (
     <div
-      className="border-b border-[#FCD34D] bg-watch-light px-4 py-2 text-watch-dark"
+      className="border-b border-teal/30 bg-watch-light px-4 py-2 text-navy"
       role="alert"
       aria-live="polite"
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-2 text-xs font-semibold sm:px-6 lg:px-8">
-        <span className="h-2 w-2 animate-pulse rounded-full bg-critical-dark" aria-hidden="true" />
+        <span className="h-2 w-2 animate-pulse rounded-full bg-navy" aria-hidden="true" />
         <span>
           {t("offline")} — {t("last_update")} {formatTime(lastUpdated)}
         </span>

@@ -55,7 +55,7 @@ export default function CarePlanEditor({ patientId }: { patientId: number }) {
   if (loading) {
     return (
       <Card hoverable={false} className="flex h-48 items-center justify-center">
-        <span className="text-sm text-[#94A3B8]">{t("loading_patient")}</span>
+        <span className="text-sm text-navy/60">{t("loading_patient")}</span>
       </Card>
     )
   }
@@ -70,36 +70,36 @@ export default function CarePlanEditor({ patientId }: { patientId: number }) {
       {plan ? (
         <div className="space-y-4">
           <div>
-            <label className="mb-2 block text-xs font-semibold text-[#475569]">{t("notes")}</label>
+            <label className="mb-2 block text-xs font-semibold text-navy/70">{t("notes")}</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               disabled={!canEdit}
-              className={`w-full rounded-xl border border-[#E6EBF2] p-3 text-sm outline-none transition-all duration-150 ${
+              className={`w-full rounded-xl border border-line p-3 text-sm outline-none transition-all duration-150 ${
                 !canEdit
-                  ? "bg-[#F1F4F9] text-[#94A3B8]"
-                  : "bg-white text-[#0F172A] focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  ? "bg-teal/10 text-navy/60"
+                  : "bg-white text-navy focus:border-teal focus:ring-2 focus:ring-teal/25"
               }`}
               rows={3}
             />
           </div>
           <div>
-            <label className="mb-2 block text-xs font-semibold text-[#475569]">
+            <label className="mb-2 block text-xs font-semibold text-navy/70">
               {t("thresholds")}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               {Object.entries(thresholds).map(([key, val]: [string, any]) => (
                 <div
                   key={key}
-                  className="rounded-xl border border-[#E6EBF2] bg-[#F1F4F9] p-3"
+                  className="rounded-xl border border-line bg-teal/10 p-3"
                 >
-                  <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">
+                  <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-navy/60">
                     {t(key as any) ?? key}
                   </div>
-                  <div className="mb-1 text-sm font-semibold text-[#0F172A]">
+                  <div className="mb-1 text-sm font-semibold text-navy">
                     {val.min} – {val.max}
                   </div>
-                  <div className="text-[10px] text-[#94A3B8]">
+                  <div className="text-[10px] text-navy/60">
                     {t("critical_range", { min: val.critical_min, max: val.critical_max })}
                   </div>
                 </div>
@@ -113,7 +113,7 @@ export default function CarePlanEditor({ patientId }: { patientId: number }) {
           )}
         </div>
       ) : (
-        <p className="text-sm text-[#94A3B8]">{t("no_care_plan")}</p>
+        <p className="text-sm text-navy/60">{t("no_care_plan")}</p>
       )}
     </Card>
   )

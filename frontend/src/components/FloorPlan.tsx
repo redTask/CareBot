@@ -5,15 +5,15 @@ import Card from "./Card"
 import Icon from "./Icon"
 
 const STATUS_CELL: Record<string, string> = {
-  normal: "border-[#BBF7D0] bg-normal-light text-normal-dark",
-  watch: "border-[#FCD34D] bg-watch-light text-watch-dark",
-  critical: "border-[#FCA5A5] bg-critical-light text-critical-dark",
+  normal: "border-lime bg-lime/60 text-navy",
+  watch: "border-teal bg-watch-light text-navy",
+  critical: "border-2 border-navy bg-navy/[0.08] text-navy font-bold",
 }
 
 const LEGEND = [
-  { key: "status_normal", dot: "bg-normal-dark" },
-  { key: "status_watch", dot: "bg-watch-dark" },
-  { key: "status_critical", dot: "bg-critical-dark" },
+  { key: "status_normal", dot: "bg-lime" },
+  { key: "status_watch", dot: "bg-teal" },
+  { key: "status_critical", dot: "bg-navy" },
 ]
 
 export default function FloorPlan({
@@ -29,10 +29,10 @@ export default function FloorPlan({
     <Card padded={false} hoverable={false} className="overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 p-5">
         <div>
-          <h3 className="text-lg font-semibold font-heading text-[#0F172A]">
+          <h3 className="text-lg font-semibold font-heading text-navy">
             {t("ward_floor_plan")}
           </h3>
-          <p className="mt-0.5 text-xs text-[#94A3B8]">
+          <p className="mt-0.5 text-xs text-navy/60">
             {beds.length} beds • 2 rows × 5 cols
           </p>
         </div>
@@ -40,7 +40,7 @@ export default function FloorPlan({
           type="button"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
-          className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-[#E6EBF2] bg-white px-3 text-sm font-semibold text-[#475569] transition-colors hover:bg-[#F1F4F9]"
+          className="inline-flex min-h-[40px] items-center gap-1.5 rounded-xl border border-line bg-white px-3 text-sm font-semibold text-navy/70 transition-colors hover:bg-teal/10"
         >
           <Icon name={open ? "chevron-up" : "chevron-down"} size={16} />
           {open ? t("floor_plan_hide") : t("floor_plan_show")}
@@ -48,9 +48,9 @@ export default function FloorPlan({
       </div>
 
       {open && (
-        <div className="border-t border-[#E6EBF2] bg-[#F8FAFC] p-4 sm:p-5">
+        <div className="border-t border-line bg-mint/[0.08] p-4 sm:p-5">
           {beds.length === 0 ? (
-            <p className="py-6 text-center text-sm text-[#94A3B8]">{t("no_beds")}</p>
+            <p className="py-6 text-center text-sm text-navy/60">{t("no_beds")}</p>
           ) : (
             <div className="grid grid-cols-5 gap-2 sm:gap-3">
               {beds.map((bed) => {
@@ -69,11 +69,11 @@ export default function FloorPlan({
                     <span className="text-[10px] font-bold uppercase tracking-wide sm:text-xs">
                       {bed.label}
                     </span>
-                    <span className="mt-0.5 max-w-full truncate text-[10px] text-[#475569]">
+                    <span className="mt-0.5 max-w-full truncate text-[10px] font-semibold text-navy/70">
                       {bed.patient ? bed.patient.name.split(" ")[0] : t("unoccupied")}
                     </span>
                     {robotsHere.length > 0 && (
-                      <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white shadow-sm">
+                      <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal text-white shadow-sm">
                         <Icon name="robot" size={16} className="w-3 h-3" />
                       </span>
                     )}
@@ -83,7 +83,7 @@ export default function FloorPlan({
             </div>
           )}
 
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-[10px] font-medium text-[#64748B]">
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-[10px] font-semibold text-navy/70">
             {LEGEND.map((item) => (
               <span key={item.key} className="inline-flex items-center gap-1.5">
                 <span className={`h-2 w-2 rounded-full ${item.dot}`} aria-hidden="true" />
@@ -91,7 +91,7 @@ export default function FloorPlan({
               </span>
             ))}
             <span className="inline-flex items-center gap-1.5">
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-white">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal text-white">
                 <Icon name="robot" size={16} className="w-2.5 h-2.5" />
               </span>
               {t("robots")}

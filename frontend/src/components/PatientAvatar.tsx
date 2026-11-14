@@ -18,8 +18,8 @@ export default function PatientAvatar({
       createAvatar(initials, {
         seed: name,
         chars: 2,
-        backgroundColor: ["EAF0FF"],
-        textColor: ["1F55D6"],
+        backgroundColor: ["51E4BA"],
+        textColor: ["254262"],
         fontFamily: ["Inter"],
         fontWeight: 700,
         fontSize: 40,
@@ -36,7 +36,7 @@ export default function PatientAvatar({
       height={size}
       style={{ width: size, height: size }}
       className={[
-        "rounded-full border border-[#E6EBF2] bg-brand-tint shrink-0",
+        "rounded-full border border-line bg-brand-tint shrink-0",
         className,
       ]
         .filter(Boolean)

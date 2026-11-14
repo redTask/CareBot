@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from "vitest"
-import { render, screen, fireEvent } from "@testing-library/react"
+import { describe, it, expect, beforeEach, vi } from "vitest"
+import { act, render, screen, fireEvent } from "@testing-library/react"
 import EStopButton from "../EStopButton"
 
 // Mock the toast
-global.alert = vi.fn()
+globalThis.alert = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -28,8 +28,9 @@ describe("EStopButton", () => {
     fireEvent.click(button)
     
     // Press Escape
-    const keydownEvent = new KeyboardEvent("keydown", { key: "Escape" })
-    document.dispatchEvent(keydownEvent)
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))
+    })
     
     // Dialog should be closed
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()

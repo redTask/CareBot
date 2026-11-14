@@ -15,12 +15,12 @@ export interface PatientMedication {
 }
 
 const STATUS: Record<string, { pill: string; labelKey: string }> = {
-  pending: { pill: "bg-watch-light text-watch-dark", labelKey: "status_pending" },
+  pending: { pill: "bg-teal/15 text-navy", labelKey: "status_pending" },
   acknowledged: {
-    pill: "bg-normal-light text-normal-dark",
+    pill: "bg-lime text-navy",
     labelKey: "status_acknowledged",
   },
-  missed: { pill: "bg-critical-light text-critical-dark", labelKey: "status_missed" },
+  missed: { pill: "bg-navy text-white", labelKey: "status_missed" },
 }
 
 export default function MedicationReminder({
@@ -72,11 +72,11 @@ export default function MedicationReminder({
             return (
               <div
                 key={medication.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#E6EBF2] p-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line p-3"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-[#0F172A]">
+                    <span className="text-sm font-semibold text-navy">
                       {medication.drug} {medication.dose}
                     </span>
                     {cfg && (
@@ -87,7 +87,7 @@ export default function MedicationReminder({
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 text-xs text-[#94A3B8]">
+                  <div className="mt-1 text-xs text-navy/60">
                     {medication.schedule_times.join(" · ")}
                     {event?.due_at && ` • ${t("due_x", { time: formatTime(event.due_at) })}`}
                   </div>
@@ -98,7 +98,7 @@ export default function MedicationReminder({
                       type="button"
                       disabled={busy}
                       onClick={() => act(event.id, "ack")}
-                      className="min-h-[40px] rounded-xl border border-[#BBF7D0] bg-normal-light px-3 text-xs font-semibold text-normal-dark transition-colors hover:bg-[#D7F2E1] disabled:opacity-60"
+                      className="min-h-[40px] rounded-xl border border-teal bg-lime px-3 text-xs font-bold text-navy transition-colors hover:bg-mint disabled:opacity-60"
                     >
                       {t("acknowledge_med")}
                     </button>
@@ -106,13 +106,13 @@ export default function MedicationReminder({
                       type="button"
                       disabled={busy}
                       onClick={() => act(event.id, "miss")}
-                      className="min-h-[40px] rounded-xl border border-[#FECACA] bg-critical-light px-3 text-xs font-semibold text-critical-dark transition-colors hover:bg-[#FBD5D5] disabled:opacity-60"
+                      className="min-h-[40px] rounded-xl border border-navy bg-white px-3 text-xs font-bold text-navy transition-colors hover:bg-teal/10 disabled:opacity-60"
                     >
                       {t("mark_missed")}
                     </button>
                   </div>
                 ) : (
-                  <span className="text-xs font-semibold text-[#94A3B8]">
+                  <span className="text-xs font-semibold text-navy/60">
                     {status === "acknowledged"
                       ? t("status_acknowledged")
                       : status === "missed"
@@ -125,7 +125,7 @@ export default function MedicationReminder({
           })}
 
           {patientEvents.length === 0 && (
-            <p className="text-xs text-[#94A3B8]">{t("no_medication_events")}</p>
+            <p className="text-xs text-navy/60">{t("no_medication_events")}</p>
           )}
         </div>
       )}

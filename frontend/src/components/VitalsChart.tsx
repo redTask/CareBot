@@ -12,10 +12,14 @@ import {
 import { t } from "../lib/i18n"
 import { formatTime } from "../lib/format"
 
+// Charts are always teal line + mint gradient fill.
+const TEAL = "#149DA5"
+const MINT = "#51E4BA"
+
 const SERIES: Record<string, { color: string; labelKey: string; unit: string }> = {
-  heart_rate: { color: "#EF4444", labelKey: "heart_rate_label", unit: "bpm" },
-  spo2: { color: "#2F6BFF", labelKey: "spo2_label", unit: "%" },
-  temperature: { color: "#10B981", labelKey: "temperature_label", unit: "°C" },
+  heart_rate: { color: TEAL, labelKey: "heart_rate_label", unit: "bpm" },
+  spo2: { color: TEAL, labelKey: "spo2_label", unit: "%" },
+  temperature: { color: TEAL, labelKey: "temperature_label", unit: "°C" },
 }
 
 export default function VitalsChart({
@@ -44,9 +48,9 @@ export default function VitalsChart({
 
   if (data.length === 0) {
     return (
-      <div className="flex h-52 flex-col items-center justify-center rounded-xl border border-dashed border-[#E6EBF2] bg-[#F8FAFC] text-center">
-        <span className="text-sm font-medium text-[#94A3B8]">{t("no_trend_data")}</span>
-        <span className="mt-1 text-xs text-[#CBD5E1]">
+      <div className="flex h-52 flex-col items-center justify-center rounded-xl border border-dashed border-line bg-mint/[0.08] text-center">
+        <span className="text-sm font-medium text-navy/60">{t("no_trend_data")}</span>
+        <span className="mt-1 text-xs text-navy/40">
           {t(range === "1h" ? "range_1h" : "range_24h")}
         </span>
       </div>
@@ -59,20 +63,25 @@ export default function VitalsChart({
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={series.color} stopOpacity={0.35} />
-              <stop offset="100%" stopColor={series.color} stopOpacity={0.02} />
+              <stop offset="0%" stopColor={MINT} stopOpacity={0.55} />
+              <stop offset="100%" stopColor={MINT} stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E6EBF2" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="#149DA5"
+            strokeOpacity={0.15}
+          />
           <XAxis
             dataKey="time"
-            tick={{ fontSize: 11, fill: "#94A3B8" }}
+            tick={{ fontSize: 11, fill: "#254262" }}
             axisLine={false}
             tickLine={false}
             minTickGap={24}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: "#94A3B8" }}
+            tick={{ fontSize: 11, fill: "#254262" }}
             axisLine={false}
             tickLine={false}
             width={40}
@@ -81,9 +90,10 @@ export default function VitalsChart({
           <Tooltip
             contentStyle={{
               borderRadius: 12,
-              border: "1px solid #E6EBF2",
+              border: "1px solid rgba(20, 157, 165, 0.25)",
               fontSize: 12,
-              color: "#0F172A",
+              color: "#254262",
+              background: "#ffffff",
             }}
             formatter={(value: number) => [`${value} ${series.unit}`, t(series.labelKey)]}
           />

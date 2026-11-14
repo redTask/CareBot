@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect, beforeEach, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import ShiftHandover from "../ShiftHandover"
 
 // Mock the fetch API
-global.fetch = vi.fn()
+globalThis.fetch = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()

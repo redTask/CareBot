@@ -42,9 +42,9 @@ const ORGAN_KEY: Record<IllnessKey, string> = {
 }
 
 const SEVERITY_TONE: Record<string, string> = {
-  critical: "bg-critical-light text-critical-dark",
-  watch: "bg-watch-light text-watch-dark",
-  info: "bg-brand-tint text-[#1F55D6]",
+  critical: "bg-navy text-white",
+  watch: "bg-teal text-white",
+  info: "bg-brand-tint text-navy",
 }
 
 function nextMedicine(medications: PatientMedication[]): string | null {
@@ -152,7 +152,7 @@ export default function PatientDetail() {
         <AppHeader active="dashboard" />
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="animate-pulse space-y-4">
-            <div className="h-8 w-40 rounded bg-[#E6EBF2]" />
+            <div className="h-8 w-40 rounded bg-line" />
             <div className="h-56 rounded-2xl bg-white" />
             <div className="grid gap-4 md:grid-cols-3">
               <div className="h-32 rounded-2xl bg-white" />
@@ -171,15 +171,15 @@ export default function PatientDetail() {
         <AppHeader active="dashboard" />
         <main className="mx-auto flex min-h-[60vh] max-w-7xl items-center justify-center px-4">
           <Card hoverable={false} className="w-full max-w-sm text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-critical-light text-critical-dark">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-tint text-navy">
               <Icon name="alert-circle" size={20} />
             </div>
-            <h2 className="mb-2 text-lg font-bold text-critical-dark">{t("error")}</h2>
-            <p className="mb-6 text-sm text-[#475569]">{error || t("patient_not_found")}</p>
+            <h2 className="mb-2 text-lg font-bold text-navy">{t("error")}</h2>
+            <p className="mb-6 text-sm text-navy/70">{error || t("patient_not_found")}</p>
             <button
               type="button"
               onClick={() => navigate("/dashboard")}
-              className="min-h-[44px] w-full rounded-xl bg-brand px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+              className="min-h-[44px] w-full rounded-xl bg-teal px-4 text-base font-bold text-white transition-colors hover:bg-navy"
             >
               {t("back_to_dashboard_btn")}
             </button>
@@ -212,7 +212,7 @@ export default function PatientDetail() {
         <button
           type="button"
           onClick={() => navigate("/dashboard")}
-          className="mb-4 inline-flex min-h-[40px] items-center gap-2 rounded-xl px-2 text-sm font-semibold text-brand transition-colors hover:bg-brand-tint"
+          className="mb-4 inline-flex min-h-[40px] items-center gap-2 rounded-xl px-2 text-sm font-bold text-teal transition-colors hover:bg-brand-tint"
         >
           <Icon name="arrow-left" size={16} />
           {t("back_to_dashboard_btn")}
@@ -224,10 +224,12 @@ export default function PatientDetail() {
               <div className="flex items-center gap-4">
                 <PatientAvatar name={patient.name} size={64} />
                 <div className="min-w-0">
-                  <h1 className="truncate font-heading text-2xl font-bold text-[#0F172A]">
+                  {/* The patient name leads the detail page: text-2xl, bold,
+                      navy, no truncation or opacity. */}
+                  <h1 className="break-words font-heading text-2xl font-bold leading-tight text-navy">
                     {patient.name}
                   </h1>
-                  <p className="mt-1 text-sm text-[#475569]">
+                  <p className="mt-1 text-sm font-medium text-navy/70">
                     {t("age_sex", { age: patient.age, sex: patient.sex })} •{" "}
                     {patient.bed_id != null
                       ? t("bed_x", { id: patient.bed_id })
@@ -241,7 +243,7 @@ export default function PatientDetail() {
                   {conditions.map((condition) => (
                     <span
                       key={condition}
-                      className="rounded-full bg-brand-tint px-2.5 py-1 text-[11px] font-semibold text-[#1F55D6]"
+                      className="rounded-full bg-brand-tint px-2.5 py-1 text-sm font-medium text-navy/70"
                     >
                       {condition}
                     </span>
@@ -249,20 +251,20 @@ export default function PatientDetail() {
                 </div>
               )}
 
-              <h2 className="mt-6 max-w-md font-heading text-xl font-semibold leading-snug text-[#0F172A] sm:text-2xl">
+              <h2 className="mt-6 max-w-md font-heading text-xl font-semibold leading-snug text-navy sm:text-2xl">
                 {t("general_indicators", { organ: t(organKey) })}
               </h2>
             </div>
 
             <div className="mx-auto w-full max-w-[260px]">
-              <div className="flex aspect-square items-center justify-center rounded-full bg-[#EAF0FF] p-7 ring-1 ring-[#BFD3FF]">
+              <div className="flex aspect-square items-center justify-center rounded-full bg-brand-tint p-7 ring-1 ring-teal/30">
                 <IllnessArt kind={illness} className="max-w-[190px]" />
               </div>
             </div>
           </div>
         </Card>
 
-        <div className="mb-4 flex flex-wrap gap-1 rounded-xl border border-[#E6EBF2] bg-white p-1">
+        <div className="mb-4 flex flex-wrap gap-1 rounded-xl border border-line bg-white p-1">
           {tabs.map((item) => (
             <button
               key={item.key}
@@ -272,8 +274,8 @@ export default function PatientDetail() {
               className={[
                 "min-h-[40px] rounded-lg px-4 text-sm font-semibold transition-colors",
                 tab === item.key
-                  ? "bg-brand-tint text-[#1F55D6]"
-                  : "text-[#475569] hover:bg-[#F1F4F9]",
+                  ? "bg-brand-tint text-teal"
+                  : "text-navy/70 hover:bg-teal/10",
               ].join(" ")}
             >
               {item.label}
@@ -292,14 +294,14 @@ export default function PatientDetail() {
                       <Icon name={tile.icon as any} size={24} />
                     </span>
                     <div>
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-navy/60">
                         {t(tile.labelKey)}
                       </div>
                       <div className="flex items-baseline gap-1">
-                        <span className="font-mono text-2xl font-bold text-[#0F172A]">
+                        <span className="font-mono text-2xl font-bold text-navy">
                           {reading ? reading.value.toFixed(tile.type === "temperature" ? 1 : 0) : "—"}
                         </span>
-                        <span className="text-xs text-[#94A3B8]">{tile.unit}</span>
+                        <span className="text-xs text-navy/60">{tile.unit}</span>
                       </div>
                     </div>
                   </Card>
@@ -310,15 +312,15 @@ export default function PatientDetail() {
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
               <Card hoverable={false}>
                 <SectionHead title={t("next_medicine_title")} />
-                <div className="flex items-center gap-3 rounded-xl border border-[#E6EBF2] bg-[#F8FAFC] p-4">
+                <div className="flex items-center gap-3 rounded-xl border border-line bg-mint/[0.08] p-4">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-tint text-brand">
                     <Icon name="pill" size={20} />
                   </span>
                   <div>
-                    <div className="text-sm font-semibold text-[#0F172A]">
+                    <div className="text-sm font-semibold text-navy">
                       {next ?? t("no_upcoming_medicine")}
                     </div>
-                    <div className="mt-0.5 text-xs text-[#94A3B8]">
+                    <div className="mt-0.5 text-xs text-navy/60">
                       {medications.length > 0
                         ? `${medications.length} ${t("medications")}`
                         : t("no_medications_scheduled")}
@@ -344,15 +346,15 @@ export default function PatientDetail() {
                     className={[
                       "min-h-[40px] rounded-xl px-3 text-xs font-semibold transition-colors",
                       vitalType === tile.type
-                        ? "bg-brand text-white"
-                        : "border border-[#E6EBF2] bg-white text-[#475569] hover:bg-[#F1F4F9]",
+                        ? "bg-teal text-white"
+                        : "border border-line bg-white text-navy/70 hover:bg-teal/10",
                     ].join(" ")}
                   >
                     {t(tile.labelKey)}
                   </button>
                 ))}
               </div>
-              <div className="flex rounded-xl border border-[#E6EBF2] bg-[#F1F4F9] p-0.5">
+              <div className="flex rounded-xl border border-line bg-teal/10 p-0.5">
                 {(["1h", "24h"] as const).map((value) => (
                   <button
                     key={value}
@@ -362,8 +364,8 @@ export default function PatientDetail() {
                     className={[
                       "min-h-[36px] rounded-lg px-3 text-xs font-semibold transition-colors",
                       range === value
-                        ? "bg-white text-[#1F55D6] shadow-sm"
-                        : "text-[#64748B]",
+                        ? "bg-white text-teal shadow-sm"
+                        : "text-navy/70",
                     ].join(" ")}
                   >
                     {t(value === "1h" ? "range_1h" : "range_24h")}
@@ -398,7 +400,7 @@ export default function PatientDetail() {
                 {patientAlerts.map((alert) => (
                   <div
                     key={alert.id}
-                    className="rounded-xl border border-[#E6EBF2] p-3"
+                    className="rounded-xl border border-line p-3"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span
@@ -408,14 +410,14 @@ export default function PatientDetail() {
                       >
                         {t(`severity_${alert.severity}`)}
                       </span>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-navy/60">
                         {alert.status}
                       </span>
-                      <span className="ml-auto text-[10px] text-[#94A3B8]">
+                      <span className="ml-auto text-[10px] text-navy/60">
                         {formatDateTime(alert.created_at)}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-sm text-[#0F172A]">{alert.message}</p>
+                    <p className="mt-1.5 text-sm text-navy">{alert.message}</p>
                   </div>
                 ))}
               </div>

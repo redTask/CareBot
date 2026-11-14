@@ -97,28 +97,28 @@ export default function Dashboard() {
       label: t("patients"),
       value: patients.length,
       icon: "users",
-      tone: "text-[#1F55D6] bg-brand-tint",
+      tone: "text-navy bg-brand-tint",
     },
     {
       key: "critical",
       label: t("critical"),
       value: criticalCount,
       icon: "alert-triangle",
-      tone: "text-critical-dark bg-critical-light",
+      tone: "text-white bg-navy",
     },
     {
       key: "watch",
       label: t("watch"),
       value: watchCount,
       icon: "alert-circle",
-      tone: "text-watch-dark bg-watch-light",
+      tone: "text-white bg-teal",
     },
     {
       key: "robots",
       label: t("robots_active"),
       value: robotsActive,
       icon: "robot",
-      tone: "text-normal-dark bg-normal-light",
+      tone: "text-navy bg-lime",
     },
   ] as const
 
@@ -141,13 +141,13 @@ export default function Dashboard() {
       <main className="mx-auto max-w-7xl px-4 pb-6 pt-6 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="font-heading text-2xl font-bold tracking-tight text-[#0F172A] sm:text-3xl">
+            <h1 className="font-heading text-2xl font-bold tracking-tight text-navy sm:text-3xl">
               {t("ward_overview")}
             </h1>
-            <p className="mt-1 text-sm text-[#475569]">
+            <p className="mt-1 text-sm text-navy/70">
               {t("ward_overview_subtitle")}
               {lastUpdated && (
-                <span className="ml-2 text-xs text-[#94A3B8]">
+                <span className="ml-2 text-xs text-navy/60">
                   • {t("last_update")} {formatTime(lastUpdated)}
                 </span>
               )}
@@ -173,7 +173,7 @@ export default function Dashboard() {
                     "flex min-h-[76px] items-center gap-3 rounded-2xl border bg-white p-3 text-left shadow-sm transition-all duration-150 hover:shadow-md",
                     selected
                       ? "border-brand ring-2 ring-brand/20"
-                      : "border-[#E6EBF2]",
+                      : "border-line",
                   ].join(" ")}
                 >
                   <span
@@ -182,10 +182,10 @@ export default function Dashboard() {
                     <Icon name={stat.icon as any} size={20} />
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-xl font-bold leading-none text-[#0F172A]">
+                    <span className="block text-xl font-bold leading-none text-navy">
                       {stat.value}
                     </span>
-                    <span className="mt-1 block truncate text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8]">
+                    <span className="mt-1 block truncate text-[10px] font-semibold uppercase tracking-wider text-navy/60">
                       {stat.label}
                     </span>
                   </span>
@@ -197,7 +197,7 @@ export default function Dashboard() {
 
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-xs">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-navy/60">
               <Icon name="search" size={16} />
             </span>
             <input
@@ -205,7 +205,7 @@ export default function Dashboard() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t("search_placeholder")}
-              className="h-11 w-full rounded-xl border border-[#E6EBF2] bg-white pl-9 pr-3 text-sm text-[#0F172A] outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+              className="h-11 w-full rounded-xl border border-line bg-white pl-9 pr-3 text-sm text-navy outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
               aria-label={t("search_placeholder")}
             />
           </div>
@@ -219,8 +219,8 @@ export default function Dashboard() {
                 className={[
                   "min-h-[40px] rounded-full px-3 text-xs font-semibold transition-colors",
                   filter === chip.key
-                    ? "bg-[#0F172A] text-white"
-                    : "border border-[#E6EBF2] bg-white text-[#475569] hover:bg-[#F1F4F9]",
+                    ? "bg-navy text-white"
+                    : "border border-line bg-white text-navy/70 hover:bg-teal/10",
                 ].join(" ")}
               >
                 {chip.label}
@@ -228,7 +228,8 @@ export default function Dashboard() {
               </button>
             ))}
             {criticalAlerts > 0 && (
-              <span className="rounded-full bg-critical-light px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-critical-dark">
+              <span className="inline-flex items-center gap-1 rounded-full bg-navy px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                <Icon name="alert-triangle" size={16} />
                 {t("critical_count", { count: criticalAlerts })}
               </span>
             )}
@@ -289,8 +290,8 @@ export default function Dashboard() {
           </aside>
         </div>
 
-        <footer className="mt-10 border-t border-[#E6EBF2] pt-4 text-center">
-          <p className="text-[10px] uppercase tracking-wider text-[#94A3B8]">
+        <footer className="mt-10 rounded-2xl bg-navy px-4 py-4 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-white/85">
             {t("research_prototype")}
           </p>
         </footer>

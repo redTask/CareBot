@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
-import { useAppStore } from "../store/useStore"
 import { fetchAlerts, fetchTasks, fetchMedicationEvents } from "../lib/api"
 import { t } from "../lib/i18n"
 import { error } from "../lib/toast"
+import Icon from "../components/Icon"
 
 interface ShiftStats {
   criticalAlerts: number
@@ -13,8 +13,29 @@ interface ShiftStats {
   patientsAffected: number
 }
 
+function StatBlock({
+  icon,
+  label,
+  value,
+  tone = "text-navy",
+}: {
+  icon: string
+  label: string
+  value: number | string
+  tone?: string
+}) {
+  return (
+    <div className="rounded-xl border border-line bg-white p-4">
+      <div className="flex items-center gap-2 text-navy/70">
+        <Icon name={icon as any} size={16} />
+        <h3 className="text-sm font-semibold text-navy/70">{label}</h3>
+      </div>
+      <p className={`mt-2 text-3xl font-bold ${tone}`}>{value}</p>
+    </div>
+  )
+}
+
 function ShiftHandover() {
-  const { token } = useAppStore.getState()
   const [stats, setStats] = useState<ShiftStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [shiftDuration, setShiftDuration] = useState<"8h" | "12h" | "24h">("24h")
@@ -23,9 +44,9 @@ function ShiftHandover() {
     async function loadStats() {
       try {
         const [alertsRes, tasksRes, medsRes] = await Promise.all([
-          fetchAlerts({ token }),
-          fetchTasks({ token }),
-          fetchMedicationEvents({ token }),
+          fetchAlerts(),
+          fetchTasks(),
+          fetchMedicationEvents(),
         ])
 
         const now = new Date()
@@ -88,114 +109,86 @@ function ShiftHandover() {
     }
 
     loadStats()
-  }, [token, shiftDuration])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-white rounded-2xl border border-[#E6EBF2] shadow-sm">
-        <span className="animate-spin inline-block h-8 w-8 mr-3" />
-        <span>{t("loading")}</span>
-      </div>
-    )
-  }
-
-  if (!stats) {
-    return <div>{t("no_data_available")}</div>
-  }
+  }, [shiftDuration])
 
   return (
-    <div className="min-h-screen bg-[#F4F6FB] p-6">
-      <div className="bg-white rounded-2xl border border-[#E6EBF2] shadow-sm p-6">
-        <h2 className="text-2xl font-bold text-[#0F172A] mb-6">
-          {t("shift_handover_report")}
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div>
-            <h3 className="text-semibold text-[#374151] mb-3">
-              {t("shift_duration")}
-            </h3>
-            <p className="text-3xl font-bold text-[#0F172A]">
-              {shiftDuration.toUpperCase()}
-            </p>
-          </div>
-          <div>
-            <h3 className="text-semibold text-[#374151] mb-3">
-              {t("critical_alerts")}
-            </h3>
-            <p className="text-3xl font-bold text-[#DC2626]">
-              {stats.criticalAlerts}
-            </p>
-          </div>
-          <div>
-            <h3 className="text-semibold text-[#374151] mb-3">
-              {t("estop_events")}
-            </h3>
-            <p className="text-3xl font-bold text-[#EF4444]">
-              {stats.estopEvents}
-            </p>
-          </div>
+    <div className="min-h-screen page-bg p-6">
+      <div className="rounded-2xl border border-line bg-white p-6 shadow-card">
+        <div className="mb-6 flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal text-white">
+            <Icon name="file-text" size={24} />
+          </span>
+          <h2 className="text-2xl font-bold text-navy">
+            {t("shift_handover_report")}
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <h3 className="text-semibold text-[#374151] mb-3">
-              {t("missed_medicines")}
-            </h3>
-            <p className="text-3xl font-bold text-[#DC2626]">
-              {stats.missedMedicines}
-            </p>
+        {loading || !stats ? (
+          <div className="flex items-center gap-3 rounded-xl border border-line bg-mint/[0.08] px-4 py-6">
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-teal border-t-transparent" />
+            <span className="text-sm font-semibold text-navy/70">{t("loading")}</span>
           </div>
-          <div>
-            <h3 className="text-semibold text-[#374151] mb-3">
-              {t("tasks_completed")}
-            </h3>
-            <p className="text-3xl font-bold text-[#22C55E]">
-              {stats.tasksCompleted}
-            </p>
-          </div>
+        ) : (
+        <>
+        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <StatBlock
+            icon="clock"
+            label={t("shift_duration")}
+            value={shiftDuration.toUpperCase()}
+            tone="text-teal"
+          />
+          <StatBlock
+            icon="alert-triangle"
+            label={t("critical_alerts")}
+            value={stats.criticalAlerts}
+          />
+          <StatBlock icon="power" label={t("estop_events")} value={stats.estopEvents} />
         </div>
 
-        <div>
-          <h3 className="text-semibold text-[#374151] mb-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <StatBlock
+            icon="pill"
+            label={t("missed_medicines")}
+            value={stats.missedMedicines}
+          />
+          <StatBlock
+            icon="circle-check"
+            label={t("tasks_completed")}
+            value={stats.tasksCompleted}
+            tone="text-teal"
+          />
+        </div>
+
+        <div className="mt-4 rounded-xl border border-line bg-mint/15 p-4">
+          <h3 className="text-sm font-semibold text-navy/70">
             {t("patients_affected")}
           </h3>
-          <p className="text-lg text-[#374151]">
-            {stats.patientsAffected}
-          </p>
+          <p className="mt-1 text-lg font-bold text-navy">{stats.patientsAffected}</p>
         </div>
+        </>
+        )}
       </div>
 
       {/* Shift duration selector */}
-      <div className="mt-6 p-4 bg-white rounded-2xl border border-[#E6EBF2] shadow-sm">
-        <h3 className="text-semibold text-[#374151] mb-4">
+      <div className="mt-6 rounded-2xl border border-line bg-white p-4 shadow-card">
+        <h3 className="mb-4 text-sm font-semibold text-navy/70">
           {t("select_shift_duration")}
         </h3>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShiftDuration("8h")}
-            className={`border rounded-md py-2 px-4 ${
-              shiftDuration === "8h" ? "bg-[#0F172A] text-white" : "text-[#374151]"
-            }`}
-          >
-            8h
-          </button>
-          <button
-            onClick={() => setShiftDuration("12h")}
-            className={`border rounded-md py-2 px-4 ${
-              shiftDuration === "12h" ? "bg-[#0F172A] text-white" : "text-[#374151]"
-            }`}
-          >
-            12h
-          </button>
-          <button
-            onClick={() => setShiftDuration("24h")}
-            className={`border rounded-md py-2 px-4 ${
-              shiftDuration === "24h" ? "bg-[#0F172A] text-white" : "text-[#374151]"
-            }`}
-          >
-            24h
-          </button>
+        <div className="flex flex-wrap gap-2">
+          {(["8h", "12h", "24h"] as const).map((value) => (
+            <button
+              key={value}
+              onClick={() => setShiftDuration(value)}
+              aria-pressed={shiftDuration === value}
+              className={`min-h-[40px] rounded-xl border px-4 text-base font-bold transition-colors ${
+                shiftDuration === value
+                  ? "border-teal bg-teal text-white"
+                  : "border-line bg-white text-navy hover:bg-brand-tint"
+              }`}
+            >
+              {value}
+            </button>
+          ))}
         </div>
       </div>
     </div>

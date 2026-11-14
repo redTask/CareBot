@@ -11,8 +11,8 @@ export default function LanguageToggle() {
       className={[
         "min-h-[32px] rounded-full px-2.5 text-xs font-semibold transition-colors duration-150",
         lang === value
-          ? "bg-white text-[#1F55D6] shadow-sm"
-          : "text-[#64748B] hover:text-[#0F172A]",
+          ? "bg-white text-navy shadow-sm"
+          : "text-white/85 hover:bg-white/10 hover:text-white",
         value === "ml" ? "ml-font" : "",
       ]
         .filter(Boolean)
@@ -24,7 +24,7 @@ export default function LanguageToggle() {
 
   return (
     <div
-      className="inline-flex items-center gap-0.5 rounded-full bg-[#F1F4F9] p-0.5"
+      className="inline-flex items-center gap-0.5 rounded-full bg-white/10 p-0.5"
       role="group"
       aria-label="Language"
     >

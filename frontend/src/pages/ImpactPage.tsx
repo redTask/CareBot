@@ -1,34 +1,33 @@
 import { useEffect, useState } from "react"
-import { useAppStore } from "../store/useStore"
 import { fetchAlerts, fetchTasks, fetchMedicationEvents } from "../lib/api"
 
 function ImpactPage() {
-  const { token } = useAppStore.getState()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function loadStats() {
       try {
-        void (await fetchAlerts({ token }))
-        void (await fetchTasks({ token }))
-        void (await fetchMedicationEvents({ token }))
-        setTimeout(() => setLoading(false), 1000)
+        await Promise.all([fetchAlerts(), fetchTasks(), fetchMedicationEvents()])
       } catch (e) {
-        setTimeout(() => setLoading(false), 1000)
+        console.error("Failed to load impact stats", e)
+      } finally {
+        setLoading(false)
       }
     }
 
     loadStats()
-  }, [token])
-
-  if (loading) {
-    return <div>Loading...</div>
-  }
+  }, [])
 
   return (
-    <div>
-      <h2>Impact — 30 days</h2>
-      <p>Impact stats placeholder</p>
+    <div className="min-h-screen page-bg p-6">
+      <div className="rounded-2xl border border-line bg-white p-6 shadow-card">
+        <h2 className="text-2xl font-bold text-navy">Impact — 30 days</h2>
+        {loading ? (
+          <p className="mt-2 text-sm font-semibold text-navy/70">Loading…</p>
+        ) : (
+          <p className="mt-2 text-sm font-medium text-navy/70">Impact stats placeholder</p>
+        )}
+      </div>
     </div>
   )
 }

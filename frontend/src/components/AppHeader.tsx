@@ -7,6 +7,8 @@ import PatientAvatar from "./PatientAvatar"
 
 type NavKey = "dashboard" | "tasks" | "alerts" | "audit"
 
+// Header: solid black bar so it stays distinct from the green page background,
+// white text, teal accent for the active item.
 export default function AppHeader({ active = "dashboard" }: { active?: NavKey }) {
   const user = useAppStore((state) => state.user)
   const online = useAppStore((state) => state.online)
@@ -21,13 +23,13 @@ export default function AppHeader({ active = "dashboard" }: { active?: NavKey })
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#E6EBF2] bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-black shadow-card">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
         <a href="/dashboard" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-tint text-brand">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal text-white">
             <Icon name="heart-pulse" size={20} />
           </span>
-          <span className="font-heading text-lg font-bold tracking-tight text-[#0F172A]">
+          <span className="font-heading text-lg font-bold tracking-tight text-white">
             {t("app_name")}
           </span>
         </a>
@@ -39,10 +41,10 @@ export default function AppHeader({ active = "dashboard" }: { active?: NavKey })
               href={link.href}
               aria-current={active === link.key ? "page" : undefined}
               className={[
-                "rounded-xl px-3 py-2 text-sm font-semibold transition-colors duration-150",
+                "rounded-xl px-3 py-2 text-base font-bold transition-colors duration-150",
                 active === link.key
-                  ? "bg-brand-tint text-[#1F55D6]"
-                  : "text-[#475569] hover:bg-[#F1F4F9] hover:text-[#0F172A]",
+                  ? "bg-teal text-white"
+                  : "text-white/80 font-semibold hover:bg-white/10 hover:text-white",
               ].join(" ")}
             >
               {link.label}
@@ -52,11 +54,11 @@ export default function AppHeader({ active = "dashboard" }: { active?: NavKey })
 
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <span
-            className="hidden items-center gap-1.5 rounded-full bg-[#F1F4F9] px-2.5 py-1 text-xs font-semibold text-[#475569] lg:inline-flex"
+            className="hidden items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-white lg:inline-flex"
             title={online ? t("connected") : t("offline")}
           >
             <span
-              className={`h-2 w-2 rounded-full ${online ? "bg-normal-dark" : "bg-critical-dark"}`}
+              className={`h-2 w-2 rounded-full ${online ? "bg-lime" : "bg-alert"}`}
               aria-hidden="true"
             />
             {online ? t("connected") : t("offline")}
@@ -65,13 +67,13 @@ export default function AppHeader({ active = "dashboard" }: { active?: NavKey })
           <LanguageToggle />
 
           {user && (
-            <span className="hidden items-center gap-2 rounded-full border border-[#E6EBF2] py-1 pl-1 pr-3 xl:inline-flex">
+            <span className="hidden items-center gap-2 rounded-full border border-white/20 py-1 pl-1 pr-3 xl:inline-flex">
               <PatientAvatar name={user.name} size={28} />
               <span className="leading-tight">
-                <span className="block max-w-[120px] truncate text-xs font-semibold text-[#0F172A]">
+                <span className="block max-w-[120px] truncate text-xs font-semibold text-white">
                   {user.name}
                 </span>
-                <span className="block text-[10px] uppercase tracking-wider text-[#94A3B8]">
+                <span className="block text-[10px] uppercase tracking-wider text-mint">
                   {t(user.role)}
                 </span>
               </span>

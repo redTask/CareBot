@@ -86,16 +86,16 @@ function RobotTouchscreen() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <Card padded className="max-w-sm text-center">
-          <Icon name="check-circle" size={24} className="text-success w-16 h-16 mb-3" />
+          <Icon name="check-circle" size={24} className="text-teal w-16 h-16 mb-3" />
           <h3 className="text-xl font-bold mb-2">A nurse has been notified</h3>
-          <p className="text-[#475569] mb-6">
+          <p className="text-navy/70 mb-6">
             {lastAction === "Call nurse"
               ? "A high-priority patient call alert has been created and a nurse visit task has been auto-dispatched."
               : "Notification sent."}
           </p>
           <button
             onClick={() => setShowConfirm(null)}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0F172A] bg-brand-tint border border-brand-tint rounded-md hover:bg-brand-tint focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-teal bg-white px-4 py-2 text-base font-bold text-navy hover:bg-brand-tint focus:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2"
           >
             OK
           </button>
@@ -106,15 +106,15 @@ function RobotTouchscreen() {
 
   // Render touch buttons
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#F4F6FB]">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white">
       <Card padded className="max-w-full p-6 space-y-3">
-        <h2 className="text-2xl font-bold text-[#0F172A] mb-6">Robot Touchscreen</h2>
+        <h2 className="text-2xl font-bold text-navy mb-6">Robot Touchscreen</h2>
 
         {TOUCH_BUTTONS.map((btn) => (
           <button
             key={btn.label}
             onClick={() => handleButton(btn)}
-            className={`w-full rounded-xl border-2 border-brand-tint bg-brand-tint text-white px-6 py-4 text-lg font-medium transition-colors hover:bg-brand-tint/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 min-h-[64px]`}
+            className={`w-full rounded-xl border-2 border-teal bg-teal px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-navy hover:border-navy focus:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 min-h-[64px]`}
             aria-label={btn.label}
           >
             <Icon name="hand-pointer" size={20} className="mr-3 align-middle" />
@@ -125,12 +125,12 @@ function RobotTouchscreen() {
         {showConfirm && showConfirm.button !== "cancel" && (
           <div className="mt-4 max-w-sm text-center">
             <Card padded className="max-w-sm">
-              <Icon name="check-circle" size={24} className="text-success w-12 h-12 mb-3" />
+              <Icon name="check-circle" size={24} className="text-teal w-12 h-12 mb-3" />
               <h3 className="text-xl font-bold mb-2">A nurse has been notified</h3>
-              <p className="text-[#475569] mb-6">Your request has been sent to the nursing station.</p>
+              <p className="text-navy/70 mb-6">Your request has been sent to the nursing station.</p>
               <button
                 onClick={() => setShowConfirm(null)}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0F172A] bg-white border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-teal bg-white px-4 py-2 text-base font-bold text-navy hover:bg-brand-tint focus:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2"
               >
                 OK
               </button>
@@ -141,12 +141,12 @@ function RobotTouchscreen() {
         {showConfirm && showConfirm.button === "cancel" && (
           <div className="mt-4 max-w-sm text-center">
             <Card padded className="max-w-sm">
-              <Icon name="x-circle" size={24} className="text-error w-12 h-12 mb-3" />
+              <Icon name="x-circle" size={24} className="text-navy w-12 h-12 mb-3" />
               <h3 className="text-xl font-bold mb-2">Cancelled</h3>
-              <p className="text-[#475569] mb-6">The action has been cancelled.</p>
+              <p className="text-navy/70 mb-6">The action has been cancelled.</p>
               <button
                 onClick={() => setShowConfirm(null)}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#0F172A] bg-white border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-teal bg-white px-4 py-2 text-base font-bold text-navy hover:bg-brand-tint focus:outline-none focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2"
               >
                 OK
               </button>

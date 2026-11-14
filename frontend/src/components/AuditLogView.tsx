@@ -32,16 +32,16 @@ export default function AuditLogView() {
             <Icon name="file-text" size={24} />
           </span>
           <div>
-            <h1 className="font-heading text-2xl font-bold text-[#0F172A]">
+            <h1 className="font-heading text-2xl font-bold text-navy">
               {t("audit_log")}
             </h1>
-            <p className="mt-1 text-sm text-[#475569]">{t("audit_subtitle")}</p>
+            <p className="mt-1 text-sm text-navy/70">{t("audit_subtitle")}</p>
           </div>
         </div>
 
         {error && (
-          <Card hoverable={false} className="mb-4 border-critical-light bg-critical-light/40">
-            <p className="text-sm text-critical-dark">{error}</p>
+          <Card hoverable={false} className="mb-4 border-navy/30 bg-navy/[0.05]">
+            <p className="text-sm font-semibold text-navy">{error}</p>
           </Card>
         )}
 
@@ -59,13 +59,13 @@ export default function AuditLogView() {
           <Card padded={false} hoverable={false} className="overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-left">
-                <thead className="bg-[#F1F4F9]">
+                <thead className="bg-teal/10">
                   <tr>
                     {[t("time"), t("user"), t("action"), t("entity"), t("details")].map(
                       (heading) => (
                         <th
                           key={heading}
-                          className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]"
+                          className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-navy/60"
                         >
                           {heading}
                         </th>
@@ -73,20 +73,20 @@ export default function AuditLogView() {
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E6EBF2]">
+                <tbody className="divide-y divide-line">
                   {logs.map((log) => (
-                    <tr key={log.id} className="transition-colors hover:bg-[#F8FAFC]">
-                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[#475569]">
+                    <tr key={log.id} className="transition-colors hover:bg-mint/[0.08]">
+                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-navy/70">
                         {formatDateTime(log.timestamp)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-[#0F172A]">
+                      <td className="px-4 py-3 text-sm text-navy">
                         {log.user_id != null ? t("user_x", { id: log.user_id }) : t("system")}
                       </td>
-                      <td className="px-4 py-3 text-sm font-semibold text-[#0F172A]">
+                      <td className="px-4 py-3 text-sm font-semibold text-navy">
                         {log.action}
                       </td>
-                      <td className="px-4 py-3 text-sm text-[#475569]">{log.entity}</td>
-                      <td className="max-w-xs truncate px-4 py-3 font-mono text-xs text-[#94A3B8]">
+                      <td className="px-4 py-3 text-sm text-navy/70">{log.entity}</td>
+                      <td className="max-w-xs truncate px-4 py-3 font-mono text-xs text-navy/60">
                         {JSON.stringify(log.details || {})}
                       </td>
                     </tr>
